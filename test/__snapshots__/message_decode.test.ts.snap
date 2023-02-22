@@ -1,0 +1,1963 @@
+export const snapshot = {};
+
+snapshot[`Decode message 1`] = `
+{
+  additional: [
+  ],
+  answer: [
+    {
+      CLASS: 1,
+      NAME: "_http._tcp.local",
+      RDATA: "BOX@TuneBlade._http._tcp.local",
+      RDLENGTH: 32,
+      TTL: 4499,
+      TYPE: 12,
+    },
+  ],
+  authority: [
+  ],
+  header: {
+    AA: 0,
+    AD: 0,
+    ANCOUNT: 1,
+    ARCOUNT: 0,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 0,
+    OPCODE: 0,
+    QDCOUNT: 1,
+    QR: 0,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+    {
+      QCLASS: 1,
+      QNAME: "_http._tcp.local",
+      QTYPE: 12,
+    },
+  ],
+}
+`;
+
+snapshot[`Decode message 2`] = `
+{
+  additional: [
+  ],
+  answer: [
+  ],
+  authority: [
+  ],
+  header: {
+    AA: 0,
+    AD: 0,
+    ANCOUNT: 0,
+    ARCOUNT: 0,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 0,
+    OPCODE: 0,
+    QDCOUNT: 5,
+    QR: 0,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+    {
+      QCLASS: 1,
+      QNAME: "b._dns-sd._udp.0.0.254.169.in-addr.arpa",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "db._dns-sd._udp.0.0.254.169.in-addr.arpa",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "r._dns-sd._udp.0.0.254.169.in-addr.arpa",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "dr._dns-sd._udp.0.0.254.169.in-addr.arpa",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "lb._dns-sd._udp.0.0.254.169.in-addr.arpa",
+      QTYPE: 12,
+    },
+  ],
+}
+`;
+
+snapshot[`Decode message 3`] = `
+{
+  additional: [
+    {
+      CLASS: 32769,
+      NAME: "box.local",
+      RDATA: "169.254.171.172",
+      RDLENGTH: 4,
+      TTL: 120,
+      TYPE: 1,
+    },
+    {
+      CLASS: 32769,
+      NAME: "box.local",
+      RDATA: "fe80::c5b:7534:952d:163a",
+      RDLENGTH: 16,
+      TTL: 120,
+      TYPE: 28,
+    },
+    {
+      CLASS: 32769,
+      NAME: "box.local",
+      RDATA: {
+        nextDomainName: "box.local",
+        types: [
+          1,
+          28,
+        ],
+      },
+      RDLENGTH: 17,
+      TTL: 120,
+      TYPE: 47,
+    },
+    {
+      CLASS: 32769,
+      NAME: "test._service._tcp.local",
+      RDATA: {
+        nextDomainName: "test._service._tcp.local",
+        types: [
+          16,
+          33,
+        ],
+      },
+      RDLENGTH: 33,
+      TTL: 4500,
+      TYPE: 47,
+    },
+  ],
+  answer: [
+    {
+      CLASS: 32769,
+      NAME: "test._service._tcp.local",
+      RDATA: undefined,
+      RDLENGTH: 1,
+      TTL: 4500,
+      TYPE: 16,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_service._tcp.local",
+      RDLENGTH: 21,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_service._tcp.local",
+      RDATA: "test._service._tcp.local",
+      RDLENGTH: 26,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 32769,
+      NAME: "test._service._tcp.local",
+      RDATA: {
+        port: 9090,
+        priority: 0,
+        target: "box.local",
+        weight: 0,
+      },
+      RDLENGTH: 17,
+      TTL: 120,
+      TYPE: 33,
+    },
+  ],
+  authority: [
+  ],
+  header: {
+    AA: 1,
+    AD: 0,
+    ANCOUNT: 4,
+    ARCOUNT: 4,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 0,
+    OPCODE: 0,
+    QDCOUNT: 0,
+    QR: 1,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+  ],
+}
+`;
+
+snapshot[`Decode message 4`] = `
+{
+  additional: [
+  ],
+  answer: [
+  ],
+  authority: [
+    {
+      CLASS: 1,
+      NAME: "test._service._tcp.local",
+      RDATA: {
+        port: 9090,
+        priority: 0,
+        target: "box.local",
+        weight: 0,
+      },
+      RDLENGTH: 12,
+      TTL: 120,
+      TYPE: 33,
+    },
+  ],
+  header: {
+    AA: 0,
+    AD: 0,
+    ANCOUNT: 0,
+    ARCOUNT: 0,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 1,
+    OPCODE: 0,
+    QDCOUNT: 1,
+    QR: 0,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+    {
+      QCLASS: 32769,
+      QNAME: "test._service._tcp.local",
+      QTYPE: 255,
+    },
+  ],
+}
+`;
+
+snapshot[`Decode message 5`] = `
+{
+  additional: [
+  ],
+  answer: [
+  ],
+  authority: [
+    {
+      CLASS: 32769,
+      NAME: "SomeChromecast._googlecast._tcp.local",
+      RDATA: "id=3111d0e34fb2d11ed1119c81111e8111",
+      RDLENGTH: 146,
+      TTL: 4500,
+      TYPE: 16,
+    },
+    {
+      CLASS: 32769,
+      NAME: "SomeChromecast._googlecast._tcp.local",
+      RDATA: {
+        port: 8009,
+        priority: 0,
+        target: "SomeChromecast.local",
+        weight: 0,
+      },
+      RDLENGTH: 28,
+      TTL: 120,
+      TYPE: 33,
+    },
+    {
+      CLASS: 32769,
+      NAME: "SomeChromecast.local",
+      RDATA: "192.168.194.195",
+      RDLENGTH: 4,
+      TTL: 120,
+      TYPE: 1,
+    },
+  ],
+  header: {
+    AA: 0,
+    AD: 0,
+    ANCOUNT: 0,
+    ARCOUNT: 0,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 3,
+    OPCODE: 0,
+    QDCOUNT: 2,
+    QR: 0,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+    {
+      QCLASS: 1,
+      QNAME: "SomeChromecast._googlecast._tcp.local",
+      QTYPE: 255,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "SomeChromecast.local",
+      QTYPE: 255,
+    },
+  ],
+}
+`;
+
+snapshot[`Decode message 6`] = `
+{
+  additional: [
+  ],
+  answer: [
+    {
+      CLASS: 1,
+      NAME: "_raop._tcp.local",
+      RDATA: "E3CA3693F4EB@RuneAudio._raop._tcp.local",
+      RDLENGTH: 41,
+      TTL: 4180,
+      TYPE: 12,
+    },
+  ],
+  authority: [
+  ],
+  header: {
+    AA: 0,
+    AD: 0,
+    ANCOUNT: 1,
+    ARCOUNT: 0,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 0,
+    OPCODE: 0,
+    QDCOUNT: 4,
+    QR: 0,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+    {
+      QCLASS: 32769,
+      QNAME: "_raop._tcp.local",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 32769,
+      QNAME: "_airplay._tcp.local",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 32769,
+      QNAME: "_raop._tcp.local",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 32769,
+      QNAME: "_airplay._tcp.local",
+      QTYPE: 12,
+    },
+  ],
+}
+`;
+
+snapshot[`Decode message 7`] = `
+{
+  additional: [
+  ],
+  answer: [
+  ],
+  authority: [
+  ],
+  header: {
+    AA: 0,
+    AD: 0,
+    ANCOUNT: 0,
+    ARCOUNT: 0,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 0,
+    OPCODE: 0,
+    QDCOUNT: 5,
+    QR: 0,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+    {
+      QCLASS: 1,
+      QNAME: "b._dns-sd._udp.0.0.254.169.in-addr.arpa",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "db._dns-sd._udp.0.0.254.169.in-addr.arpa",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "r._dns-sd._udp.0.0.254.169.in-addr.arpa",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "dr._dns-sd._udp.0.0.254.169.in-addr.arpa",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "lb._dns-sd._udp.0.0.254.169.in-addr.arpa",
+      QTYPE: 12,
+    },
+  ],
+}
+`;
+
+snapshot[`Decode message 8`] = `
+{
+  additional: [
+    {
+      CLASS: 1440,
+      NAME: "",
+      RDATA: Uint8Array(12) [
+        0,
+        4,
+        0,
+        8,
+        0,
+        11,
+        0,
+        35,
+        20,
+        217,
+        197,
+        208,
+      ],
+      RDLENGTH: 12,
+      TTL: 4500,
+      TYPE: 41,
+    },
+  ],
+  answer: [
+    {
+      CLASS: 1,
+      NAME: "_raop._tcp.local",
+      RDATA: "E3CA3693F4EB@RuneAudio._raop._tcp.local",
+      RDLENGTH: 41,
+      TTL: 4460,
+      TYPE: 12,
+    },
+  ],
+  authority: [
+  ],
+  header: {
+    AA: 0,
+    AD: 0,
+    ANCOUNT: 1,
+    ARCOUNT: 1,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 0,
+    OPCODE: 0,
+    QDCOUNT: 8,
+    QR: 0,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+    {
+      QCLASS: 1,
+      QNAME: "_apple-mobdev._tcp.local",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "41c60515._sub._apple-mobdev2._tcp.local",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "b._dns-sd._udp.0.0.254.169.in-addr.arpa",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "db._dns-sd._udp.0.0.254.169.in-addr.arpa",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "r._dns-sd._udp.0.0.254.169.in-addr.arpa",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "dr._dns-sd._udp.0.0.254.169.in-addr.arpa",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "lb._dns-sd._udp.0.0.254.169.in-addr.arpa",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "_raop._tcp.local",
+      QTYPE: 12,
+    },
+  ],
+}
+`;
+
+snapshot[`Decode message 9`] = `
+{
+  additional: [
+    {
+      CLASS: 32769,
+      NAME: "box.local",
+      RDATA: "169.254.171.172",
+      RDLENGTH: 4,
+      TTL: 120,
+      TYPE: 1,
+    },
+    {
+      CLASS: 32769,
+      NAME: "box.local",
+      RDATA: "fe80::c5b:7534:952d:163a",
+      RDLENGTH: 16,
+      TTL: 120,
+      TYPE: 28,
+    },
+    {
+      CLASS: 32769,
+      NAME: "box.local",
+      RDATA: {
+        nextDomainName: "box.local",
+        types: [
+          1,
+          28,
+        ],
+      },
+      RDLENGTH: 17,
+      TTL: 120,
+      TYPE: 47,
+    },
+    {
+      CLASS: 32769,
+      NAME: "Test._testlargetxt._tcp.local",
+      RDATA: {
+        nextDomainName: "Test._testlargetxt._tcp.local",
+        types: [
+          16,
+          33,
+        ],
+      },
+      RDLENGTH: 38,
+      TTL: 4500,
+      TYPE: 47,
+    },
+  ],
+  answer: [
+    {
+      CLASS: 32769,
+      NAME: "Test._testlargetxt._tcp.local",
+      RDATA: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      RDLENGTH: 1024,
+      TTL: 4500,
+      TYPE: 16,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_testlargetxt._tcp.local",
+      RDLENGTH: 26,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_testlargetxt._tcp.local",
+      RDATA: "Test._testlargetxt._tcp.local",
+      RDLENGTH: 31,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 32769,
+      NAME: "Test._testlargetxt._tcp.local",
+      RDATA: {
+        port: 9029,
+        priority: 0,
+        target: "box.local",
+        weight: 0,
+      },
+      RDLENGTH: 17,
+      TTL: 120,
+      TYPE: 33,
+    },
+  ],
+  authority: [
+  ],
+  header: {
+    AA: 1,
+    AD: 0,
+    ANCOUNT: 4,
+    ARCOUNT: 4,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 0,
+    OPCODE: 0,
+    QDCOUNT: 0,
+    QR: 1,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+  ],
+}
+`;
+
+snapshot[`Decode message 10`] = `
+{
+  additional: [
+  ],
+  answer: [
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_http._tcp.local",
+      RDLENGTH: 13,
+      TTL: 4250,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_dacp._tcp.local",
+      RDLENGTH: 8,
+      TTL: 4451,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_workstation._tcp.local",
+      RDLENGTH: 15,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_smb._tcp.local",
+      RDLENGTH: 7,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_device-info._tcp.local",
+      RDLENGTH: 15,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_teamviewer._tcp.local",
+      RDLENGTH: 14,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_conductor._tcp.local",
+      RDLENGTH: 13,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_calibre._tcp.local",
+      RDLENGTH: 11,
+      TTL: 3600,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_stanza._tcp.local",
+      RDLENGTH: 10,
+      TTL: 3600,
+      TYPE: 12,
+    },
+  ],
+  authority: [
+  ],
+  header: {
+    AA: 0,
+    AD: 0,
+    ANCOUNT: 9,
+    ARCOUNT: 0,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 0,
+    OPCODE: 0,
+    QDCOUNT: 1,
+    QR: 0,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+    {
+      QCLASS: 1,
+      QNAME: "_services._dns-sd._udp.local",
+      QTYPE: 12,
+    },
+  ],
+}
+`;
+
+snapshot[`Decode message 11`] = `
+{
+  additional: [
+    {
+      CLASS: 32769,
+      NAME: "box.local",
+      RDATA: "169.254.171.172",
+      RDLENGTH: 4,
+      TTL: 120,
+      TYPE: 1,
+    },
+    {
+      CLASS: 32769,
+      NAME: "box.local",
+      RDATA: "fe80::c5b:7534:952d:163a",
+      RDLENGTH: 16,
+      TTL: 120,
+      TYPE: 28,
+    },
+    {
+      CLASS: 32769,
+      NAME: "box.local",
+      RDATA: {
+        nextDomainName: "box.local",
+        types: [
+          1,
+          28,
+        ],
+      },
+      RDLENGTH: 8,
+      TTL: 120,
+      TYPE: 47,
+    },
+    {
+      CLASS: 32769,
+      NAME: "test._service._tcp.local",
+      RDATA: {
+        nextDomainName: "test._service._tcp.local",
+        types: [
+          16,
+          33,
+        ],
+      },
+      RDLENGTH: 9,
+      TTL: 4500,
+      TYPE: 47,
+    },
+  ],
+  answer: [
+    {
+      CLASS: 32769,
+      NAME: "test._service._tcp.local",
+      RDATA: undefined,
+      RDLENGTH: 1,
+      TTL: 4500,
+      TYPE: 16,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_service._tcp.local",
+      RDLENGTH: 2,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_service._tcp.local",
+      RDATA: "test._service._tcp.local",
+      RDLENGTH: 2,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 32769,
+      NAME: "test._service._tcp.local",
+      RDATA: {
+        port: 9090,
+        priority: 0,
+        target: "box.local",
+        weight: 0,
+      },
+      RDLENGTH: 12,
+      TTL: 120,
+      TYPE: 33,
+    },
+  ],
+  authority: [
+  ],
+  header: {
+    AA: 1,
+    AD: 0,
+    ANCOUNT: 4,
+    ARCOUNT: 4,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 0,
+    OPCODE: 0,
+    QDCOUNT: 0,
+    QR: 1,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+  ],
+}
+`;
+
+snapshot[`Decode message 12`] = `
+{
+  additional: [
+    {
+      CLASS: 32769,
+      NAME: "Test._testupdate._tcp.local",
+      RDATA: {
+        nextDomainName: "Test._testupdate._tcp.local",
+        types: [
+          13,
+          16,
+          33,
+        ],
+      },
+      RDLENGTH: 36,
+      TTL: 4500,
+      TYPE: 47,
+    },
+  ],
+  answer: [
+    {
+      CLASS: 32769,
+      NAME: "Test._testupdate._tcp.local",
+      RDATA: Uint8Array(14) [
+        2,
+        80,
+        67,
+        10,
+        87,
+        105,
+        110,
+        100,
+        111,
+        119,
+        115,
+        32,
+        88,
+        80,
+      ],
+      RDLENGTH: 14,
+      TTL: 4500,
+      TYPE: 13,
+    },
+  ],
+  authority: [
+  ],
+  header: {
+    AA: 1,
+    AD: 0,
+    ANCOUNT: 1,
+    ARCOUNT: 1,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 0,
+    OPCODE: 0,
+    QDCOUNT: 0,
+    QR: 1,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+  ],
+}
+`;
+
+snapshot[`Decode message 13`] = `
+{
+  additional: [
+  ],
+  answer: [
+    {
+      CLASS: 1,
+      NAME: "_service._tcp.local",
+      RDATA: "test._service._tcp.local",
+      RDLENGTH: 7,
+      TTL: 0,
+      TYPE: 12,
+    },
+  ],
+  authority: [
+  ],
+  header: {
+    AA: 1,
+    AD: 0,
+    ANCOUNT: 1,
+    ARCOUNT: 0,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 0,
+    OPCODE: 0,
+    QDCOUNT: 0,
+    QR: 1,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+  ],
+}
+`;
+
+snapshot[`Decode message 14`] = `
+{
+  additional: [
+    {
+      CLASS: 1440,
+      NAME: "",
+      RDATA: Uint8Array(12) [
+        0,
+        4,
+        0,
+        8,
+        0,
+        11,
+        0,
+        35,
+        20,
+        217,
+        197,
+        208,
+      ],
+      RDLENGTH: 12,
+      TTL: 4500,
+      TYPE: 41,
+    },
+  ],
+  answer: [
+    {
+      CLASS: 1,
+      NAME: "_raop._tcp.local",
+      RDATA: "E3CA3693F4EB@RuneAudio._raop._tcp.local",
+      RDLENGTH: 25,
+      TTL: 4460,
+      TYPE: 12,
+    },
+  ],
+  authority: [
+  ],
+  header: {
+    AA: 0,
+    AD: 0,
+    ANCOUNT: 1,
+    ARCOUNT: 1,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 0,
+    OPCODE: 0,
+    QDCOUNT: 8,
+    QR: 0,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+    {
+      QCLASS: 1,
+      QNAME: "_apple-mobdev._tcp.local",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "41c60515._sub._apple-mobdev2._tcp.local",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "b._dns-sd._udp.0.0.254.169.in-addr.arpa",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "db._dns-sd._udp.0.0.254.169.in-addr.arpa",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "r._dns-sd._udp.0.0.254.169.in-addr.arpa",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "dr._dns-sd._udp.0.0.254.169.in-addr.arpa",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "lb._dns-sd._udp.0.0.254.169.in-addr.arpa",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "_raop._tcp.local",
+      QTYPE: 12,
+    },
+  ],
+}
+`;
+
+snapshot[`Decode message 15`] = `
+{
+  additional: [
+  ],
+  answer: [
+    {
+      CLASS: 1,
+      NAME: "_service._tcp.local",
+      RDATA: "test._service._tcp.local",
+      RDLENGTH: 26,
+      TTL: 0,
+      TYPE: 12,
+    },
+  ],
+  authority: [
+  ],
+  header: {
+    AA: 1,
+    AD: 0,
+    ANCOUNT: 1,
+    ARCOUNT: 0,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 0,
+    OPCODE: 0,
+    QDCOUNT: 0,
+    QR: 1,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+  ],
+}
+`;
+
+snapshot[`Decode message 16`] = `
+{
+  additional: [
+  ],
+  answer: [
+  ],
+  authority: [
+    {
+      CLASS: 1,
+      NAME: "test._service._tcp.local",
+      RDATA: {
+        port: 9090,
+        priority: 0,
+        target: "box.local",
+        weight: 0,
+      },
+      RDLENGTH: 17,
+      TTL: 120,
+      TYPE: 33,
+    },
+  ],
+  header: {
+    AA: 0,
+    AD: 0,
+    ANCOUNT: 0,
+    ARCOUNT: 0,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 1,
+    OPCODE: 0,
+    QDCOUNT: 1,
+    QR: 0,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+    {
+      QCLASS: 32769,
+      QNAME: "test._service._tcp.local",
+      QTYPE: 255,
+    },
+  ],
+}
+`;
+
+snapshot[`Decode message 17`] = `
+{
+  additional: [
+    {
+      CLASS: 32769,
+      NAME: "BOX@TuneBlade._http._tcp.local",
+      RDATA: {
+        nextDomainName: "BOX@TuneBlade._http._tcp.local",
+        types: [
+          16,
+          33,
+        ],
+      },
+      RDLENGTH: 9,
+      TTL: 4500,
+      TYPE: 47,
+    },
+    {
+      CLASS: 32769,
+      NAME: "7.1.168.192.in-addr.arpa",
+      RDATA: {
+        nextDomainName: "7.1.168.192.in-addr.arpa",
+        types: [
+          12,
+        ],
+      },
+      RDLENGTH: 6,
+      TTL: 120,
+      TYPE: 47,
+    },
+    {
+      CLASS: 32769,
+      NAME: "0.3.B.7.C.7.6.1.6.2.A.1.0.C.8.6.0.0.0.0.0.0.0.0.0.0.0.0.0.8.E.F.ip6.arpa",
+      RDATA: {
+        nextDomainName: "0.3.B.7.C.7.6.1.6.2.A.1.0.C.8.6.0.0.0.0.0.0.0.0.0.0.0.0.0.8.E.F.ip6.arpa",
+        types: [
+          12,
+        ],
+      },
+      RDLENGTH: 6,
+      TTL: 120,
+      TYPE: 47,
+    },
+    {
+      CLASS: 32769,
+      NAME: "box.local",
+      RDATA: {
+        nextDomainName: "box.local",
+        types: [
+          1,
+          28,
+        ],
+      },
+      RDLENGTH: 8,
+      TTL: 120,
+      TYPE: 47,
+    },
+    {
+      CLASS: 1440,
+      NAME: "",
+      RDATA: Uint8Array(12) [
+        0,
+        4,
+        0,
+        8,
+        0,
+        11,
+        0,
+        35,
+        20,
+        217,
+        197,
+        208,
+      ],
+      RDLENGTH: 12,
+      TTL: 4500,
+      TYPE: 41,
+    },
+  ],
+  answer: [
+    {
+      CLASS: 32769,
+      NAME: "BOX@TuneBlade._http._tcp.local",
+      RDATA: "Password=False",
+      RDLENGTH: 15,
+      TTL: 4500,
+      TYPE: 16,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_http._tcp.local",
+      RDLENGTH: 2,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_http._tcp.local",
+      RDATA: "BOX@TuneBlade._http._tcp.local",
+      RDLENGTH: 2,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 32769,
+      NAME: "BOX@TuneBlade._http._tcp.local",
+      RDATA: {
+        port: 51497,
+        priority: 0,
+        target: "box.local",
+        weight: 0,
+      },
+      RDLENGTH: 12,
+      TTL: 120,
+      TYPE: 33,
+    },
+    {
+      CLASS: 32769,
+      NAME: "7.1.168.192.in-addr.arpa",
+      RDATA: "box.local",
+      RDLENGTH: 2,
+      TTL: 120,
+      TYPE: 12,
+    },
+    {
+      CLASS: 32769,
+      NAME: "0.3.B.7.C.7.6.1.6.2.A.1.0.C.8.6.0.0.0.0.0.0.0.0.0.0.0.0.0.8.E.F.ip6.arpa",
+      RDATA: "box.local",
+      RDLENGTH: 2,
+      TTL: 120,
+      TYPE: 12,
+    },
+    {
+      CLASS: 32769,
+      NAME: "box.local",
+      RDATA: "192.168.194.195",
+      RDLENGTH: 4,
+      TTL: 120,
+      TYPE: 1,
+    },
+    {
+      CLASS: 32769,
+      NAME: "box.local",
+      RDATA: "fe80::68c0:1a26:167c:7b30",
+      RDLENGTH: 16,
+      TTL: 120,
+      TYPE: 28,
+    },
+  ],
+  authority: [
+  ],
+  header: {
+    AA: 1,
+    AD: 0,
+    ANCOUNT: 8,
+    ARCOUNT: 5,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 0,
+    OPCODE: 0,
+    QDCOUNT: 0,
+    QR: 1,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+  ],
+}
+`;
+
+snapshot[`Decode message 18`] = `
+{
+  additional: [
+  ],
+  answer: [
+  ],
+  authority: [
+    {
+      CLASS: 32769,
+      NAME: "SomeChromecast._googlecast._tcp.local",
+      RDATA: "id=3111d0e34fb2d11ed1119c81111e8111",
+      RDLENGTH: 146,
+      TTL: 4500,
+      TYPE: 16,
+    },
+    {
+      CLASS: 32769,
+      NAME: "SomeChromecast._googlecast._tcp.local",
+      RDATA: {
+        port: 8009,
+        priority: 0,
+        target: "SomeChromecast.local",
+        weight: 0,
+      },
+      RDLENGTH: 8,
+      TTL: 120,
+      TYPE: 33,
+    },
+    {
+      CLASS: 32769,
+      NAME: "SomeChromecast.local",
+      RDATA: "192.168.194.195",
+      RDLENGTH: 4,
+      TTL: 120,
+      TYPE: 1,
+    },
+  ],
+  header: {
+    AA: 0,
+    AD: 0,
+    ANCOUNT: 0,
+    ARCOUNT: 0,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 3,
+    OPCODE: 0,
+    QDCOUNT: 2,
+    QR: 0,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+    {
+      QCLASS: 1,
+      QNAME: "SomeChromecast._googlecast._tcp.local",
+      QTYPE: 255,
+    },
+    {
+      QCLASS: 1,
+      QNAME: "SomeChromecast.local",
+      QTYPE: 255,
+    },
+  ],
+}
+`;
+
+snapshot[`Decode message 19`] = `
+{
+  additional: [
+  ],
+  answer: [
+    {
+      CLASS: 1,
+      NAME: "_raop._tcp.local",
+      RDATA: "E3CA3693F4EB@RuneAudio._raop._tcp.local",
+      RDLENGTH: 25,
+      TTL: 4180,
+      TYPE: 12,
+    },
+  ],
+  authority: [
+  ],
+  header: {
+    AA: 0,
+    AD: 0,
+    ANCOUNT: 1,
+    ARCOUNT: 0,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 0,
+    OPCODE: 0,
+    QDCOUNT: 4,
+    QR: 0,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+    {
+      QCLASS: 32769,
+      QNAME: "_raop._tcp.local",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 32769,
+      QNAME: "_airplay._tcp.local",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 32769,
+      QNAME: "_raop._tcp.local",
+      QTYPE: 12,
+    },
+    {
+      QCLASS: 32769,
+      QNAME: "_airplay._tcp.local",
+      QTYPE: 12,
+    },
+  ],
+}
+`;
+
+snapshot[`Decode message 20`] = `
+{
+  additional: [
+  ],
+  answer: [
+    {
+      CLASS: 1,
+      NAME: "_http._tcp.local",
+      RDATA: "BOX@TuneBlade._http._tcp.local",
+      RDLENGTH: 16,
+      TTL: 4499,
+      TYPE: 12,
+    },
+  ],
+  authority: [
+  ],
+  header: {
+    AA: 0,
+    AD: 0,
+    ANCOUNT: 1,
+    ARCOUNT: 0,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 0,
+    OPCODE: 0,
+    QDCOUNT: 1,
+    QR: 0,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+    {
+      QCLASS: 1,
+      QNAME: "_http._tcp.local",
+      QTYPE: 12,
+    },
+  ],
+}
+`;
+
+snapshot[`Decode message 21`] = `
+{
+  additional: [
+    {
+      CLASS: 32769,
+      NAME: "box.local",
+      RDATA: "169.254.171.172",
+      RDLENGTH: 4,
+      TTL: 120,
+      TYPE: 1,
+    },
+    {
+      CLASS: 32769,
+      NAME: "box.local",
+      RDATA: "fe80::c5b:7534:952d:163a",
+      RDLENGTH: 16,
+      TTL: 120,
+      TYPE: 28,
+    },
+    {
+      CLASS: 32769,
+      NAME: "box.local",
+      RDATA: {
+        nextDomainName: "box.local",
+        types: [
+          1,
+          28,
+        ],
+      },
+      RDLENGTH: 8,
+      TTL: 120,
+      TYPE: 47,
+    },
+    {
+      CLASS: 32769,
+      NAME: "Test._testlargetxt._tcp.local",
+      RDATA: {
+        nextDomainName: "Test._testlargetxt._tcp.local",
+        types: [
+          16,
+          33,
+        ],
+      },
+      RDLENGTH: 9,
+      TTL: 4500,
+      TYPE: 47,
+    },
+  ],
+  answer: [
+    {
+      CLASS: 32769,
+      NAME: "Test._testlargetxt._tcp.local",
+      RDATA: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      RDLENGTH: 1024,
+      TTL: 4500,
+      TYPE: 16,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_testlargetxt._tcp.local",
+      RDLENGTH: 2,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_testlargetxt._tcp.local",
+      RDATA: "Test._testlargetxt._tcp.local",
+      RDLENGTH: 2,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 32769,
+      NAME: "Test._testlargetxt._tcp.local",
+      RDATA: {
+        port: 9029,
+        priority: 0,
+        target: "box.local",
+        weight: 0,
+      },
+      RDLENGTH: 12,
+      TTL: 120,
+      TYPE: 33,
+    },
+  ],
+  authority: [
+  ],
+  header: {
+    AA: 1,
+    AD: 0,
+    ANCOUNT: 4,
+    ARCOUNT: 4,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 0,
+    OPCODE: 0,
+    QDCOUNT: 0,
+    QR: 1,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+  ],
+}
+`;
+
+snapshot[`Decode message 22`] = `
+{
+  additional: [
+    {
+      CLASS: 32769,
+      NAME: "Test._testupdate._tcp.local",
+      RDATA: {
+        nextDomainName: "Test._testupdate._tcp.local",
+        types: [
+          13,
+          16,
+          33,
+        ],
+      },
+      RDLENGTH: 9,
+      TTL: 4500,
+      TYPE: 47,
+    },
+  ],
+  answer: [
+    {
+      CLASS: 32769,
+      NAME: "Test._testupdate._tcp.local",
+      RDATA: Uint8Array(14) [
+        2,
+        80,
+        67,
+        10,
+        87,
+        105,
+        110,
+        100,
+        111,
+        119,
+        115,
+        32,
+        88,
+        80,
+      ],
+      RDLENGTH: 14,
+      TTL: 4500,
+      TYPE: 13,
+    },
+  ],
+  authority: [
+  ],
+  header: {
+    AA: 1,
+    AD: 0,
+    ANCOUNT: 1,
+    ARCOUNT: 1,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 0,
+    OPCODE: 0,
+    QDCOUNT: 0,
+    QR: 1,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+  ],
+}
+`;
+
+snapshot[`Decode message 23`] = `
+{
+  additional: [
+    {
+      CLASS: 32769,
+      NAME: "BOX@TuneBlade._http._tcp.local",
+      RDATA: {
+        nextDomainName: "BOX@TuneBlade._http._tcp.local",
+        types: [
+          16,
+          33,
+        ],
+      },
+      RDLENGTH: 39,
+      TTL: 4500,
+      TYPE: 47,
+    },
+    {
+      CLASS: 32769,
+      NAME: "7.1.168.192.in-addr.arpa",
+      RDATA: {
+        nextDomainName: "7.1.168.192.in-addr.arpa",
+        types: [
+          12,
+        ],
+      },
+      RDLENGTH: 30,
+      TTL: 120,
+      TYPE: 47,
+    },
+    {
+      CLASS: 32769,
+      NAME: "0.3.B.7.C.7.6.1.6.2.A.1.0.C.8.6.0.0.0.0.0.0.0.0.0.0.0.0.0.8.E.F.ip6.arpa",
+      RDATA: {
+        nextDomainName: "0.3.B.7.C.7.6.1.6.2.A.1.0.C.8.6.0.0.0.0.0.0.0.0.0.0.0.0.0.8.E.F.ip6.arpa",
+        types: [
+          12,
+        ],
+      },
+      RDLENGTH: 78,
+      TTL: 120,
+      TYPE: 47,
+    },
+    {
+      CLASS: 32769,
+      NAME: "box.local",
+      RDATA: {
+        nextDomainName: "box.local",
+        types: [
+          1,
+          28,
+        ],
+      },
+      RDLENGTH: 17,
+      TTL: 120,
+      TYPE: 47,
+    },
+    {
+      CLASS: 1440,
+      NAME: "",
+      RDATA: Uint8Array(12) [
+        0,
+        4,
+        0,
+        8,
+        0,
+        11,
+        0,
+        35,
+        20,
+        217,
+        197,
+        208,
+      ],
+      RDLENGTH: 12,
+      TTL: 4500,
+      TYPE: 41,
+    },
+  ],
+  answer: [
+    {
+      CLASS: 32769,
+      NAME: "BOX@TuneBlade._http._tcp.local",
+      RDATA: "Password=False",
+      RDLENGTH: 15,
+      TTL: 4500,
+      TYPE: 16,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_http._tcp.local",
+      RDLENGTH: 18,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_http._tcp.local",
+      RDATA: "BOX@TuneBlade._http._tcp.local",
+      RDLENGTH: 32,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 32769,
+      NAME: "BOX@TuneBlade._http._tcp.local",
+      RDATA: {
+        port: 51497,
+        priority: 0,
+        target: "box.local",
+        weight: 0,
+      },
+      RDLENGTH: 17,
+      TTL: 120,
+      TYPE: 33,
+    },
+    {
+      CLASS: 32769,
+      NAME: "7.1.168.192.in-addr.arpa",
+      RDATA: "box.local",
+      RDLENGTH: 11,
+      TTL: 120,
+      TYPE: 12,
+    },
+    {
+      CLASS: 32769,
+      NAME: "0.3.B.7.C.7.6.1.6.2.A.1.0.C.8.6.0.0.0.0.0.0.0.0.0.0.0.0.0.8.E.F.ip6.arpa",
+      RDATA: "box.local",
+      RDLENGTH: 11,
+      TTL: 120,
+      TYPE: 12,
+    },
+    {
+      CLASS: 32769,
+      NAME: "box.local",
+      RDATA: "192.168.194.195",
+      RDLENGTH: 4,
+      TTL: 120,
+      TYPE: 1,
+    },
+    {
+      CLASS: 32769,
+      NAME: "box.local",
+      RDATA: "fe80::68c0:1a26:167c:7b30",
+      RDLENGTH: 16,
+      TTL: 120,
+      TYPE: 28,
+    },
+  ],
+  authority: [
+  ],
+  header: {
+    AA: 1,
+    AD: 0,
+    ANCOUNT: 8,
+    ARCOUNT: 5,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 0,
+    OPCODE: 0,
+    QDCOUNT: 0,
+    QR: 1,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+  ],
+}
+`;
+
+snapshot[`Decode message 24`] = `
+{
+  additional: [
+  ],
+  answer: [
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_http._tcp.local",
+      RDLENGTH: 18,
+      TTL: 4250,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_dacp._tcp.local",
+      RDLENGTH: 18,
+      TTL: 4451,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_workstation._tcp.local",
+      RDLENGTH: 25,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_smb._tcp.local",
+      RDLENGTH: 17,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_device-info._tcp.local",
+      RDLENGTH: 25,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_teamviewer._tcp.local",
+      RDLENGTH: 24,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_conductor._tcp.local",
+      RDLENGTH: 23,
+      TTL: 4500,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_calibre._tcp.local",
+      RDLENGTH: 21,
+      TTL: 3600,
+      TYPE: 12,
+    },
+    {
+      CLASS: 1,
+      NAME: "_services._dns-sd._udp.local",
+      RDATA: "_stanza._tcp.local",
+      RDLENGTH: 20,
+      TTL: 3600,
+      TYPE: 12,
+    },
+  ],
+  authority: [
+  ],
+  header: {
+    AA: 0,
+    AD: 0,
+    ANCOUNT: 9,
+    ARCOUNT: 0,
+    CD: 0,
+    ID: 0,
+    NSCOUNT: 0,
+    OPCODE: 0,
+    QDCOUNT: 1,
+    QR: 0,
+    RA: 0,
+    RCODE: 0,
+    RD: 0,
+    TC: 0,
+    Z: 0,
+  },
+  question: [
+    {
+      QCLASS: 1,
+      QNAME: "_services._dns-sd._udp.local",
+      QTYPE: 12,
+    },
+  ],
+}
+`;
