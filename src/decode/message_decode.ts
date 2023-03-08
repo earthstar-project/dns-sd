@@ -1,487 +1,13 @@
-enum Flag {
-  Disabled = 0,
-  Enabled,
-}
-
-enum DnsClass {
-  /** The Internet */
-  IN = 1,
-  /** The CSNET class (obsolete) */
-  CS,
-  /** The CHAOS class*/
-  CH,
-  /** Hesiod [Dyer 87] */
-  HS,
-}
-
-/* HEADER - see RFC 1035 section 4.1.1
-
-																1  1  1  1  1  1
-	0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-|                      ID                       |
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-|QR|   Opcode  |AA|TC|RD|RA|   Z    |   RCODE   |
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-|                    QDCOUNT                    |
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-|                    ANCOUNT                    |
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-|                    NSCOUNT                    |
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-|                    ARCOUNT                    |
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-
-*/
-
-enum OpcodeFlag {
-  /** A standard query. */
-  Query = 0,
-  /** An inverse query. */
-  IQuery,
-  /** A server status request. */
-  Status,
-  /** Reserved for future use. */
-  Reserved,
-}
-
-enum RcodeFlag {
-  /** No error condition. */
-  NoError = 0,
-  /** The name server was unable to interpret the query. */
-  FormatError,
-  /** The name server was unable to process the query due to a problem with the name server. */
-  ServerFailure,
-  /** Meaningful only for responses from an authoritative name server, this code signifies that the domain name referenced in the query does not exist. */
-  NameError,
-  /** The name server does not support the requested kind of query. */
-  NotImplemented,
-  /** The name server refuses to perform the specified operation for policy reasons. */
-  Refused,
-  /** Reserved for future use. */
-  Reserved,
-}
-
-type DnsMessageHeader = {
-  /** A 16 bit identifier assigned by the program. Copied to corresponding replies.*/
-  ID: number;
-  /** Is this message a query or a response? */
-  QR: Flag;
-  /** The kind of query in this message. */
-  OPCODE: OpcodeFlag;
-  /** Whether the responding name server is an authority for the domain in question. */
-  AA: Flag;
-  /** Whether this message was truncated or not. */
-  TC: Flag;
-  /** Whether query recursion is desired. */
-  RD: Flag;
-  /** Whether recursion is available or not. */
-  RA: Flag;
-  /** Reserved for future use. */
-  Z: Flag;
-  /** Whether the data included has been verified by the server providing it. */
-  AD: Flag;
-  /** Whether non-verified data is acceptable to the resolver sending the query. */
-  CD: Flag;
-  /** Response code. */
-  RCODE: RcodeFlag;
-  /** The number of entries in the question section */
-  QDCOUNT: number;
-  /** The number of entries in the answer section */
-  ANCOUNT: number;
-  /** The number of name server resource records in the the authority records section. */
-  NSCOUNT: number;
-  /** The number of resource records in the additional records section. */
-  ARCOUNT: number;
-};
-
-export function decodeHeader(message: Uint8Array): DnsMessageHeader {
-  const dataView = new DataView(message.buffer);
-  const id = dataView.getUint16(0, false);
-  const flags = dataView.getUint16(2, false);
-  const qdCount = dataView.getUint16(4, false);
-  const anCount = dataView.getUint16(6, false);
-  const nsCount = dataView.getUint16(8, false);
-  const arCount = dataView.getUint16(10, false);
-
-  return {
-    ID: id,
-    QR: (flags & 0x8000) >> 15,
-    OPCODE: (flags & 0x7800) >> 11,
-    AA: (flags & 0x400) >> 10,
-    TC: (flags & 0x200) >> 9,
-    RD: (flags & 0x100) >> 8,
-    RA: (flags & 0x80) >> 7,
-    Z: (flags & 0x40) >> 6,
-    AD: (flags & 0x20) >> 5,
-    CD: (flags & 0x10) >> 4,
-    RCODE: (flags & 0xF),
-    QDCOUNT: qdCount,
-    ANCOUNT: anCount,
-    NSCOUNT: nsCount,
-    ARCOUNT: arCount,
-  };
-}
-
-/* */
-
-function decodeLabels(
-  message: Uint8Array,
-  startPosition: number,
-): {
-  labels: string[];
-  nextPosition: number;
-} {
-  const labels: string[] = [];
-
-  let position = startPosition;
-
-  const view = new DataView(message.buffer);
-
-  while (view.getUint8(position) !== 0) {
-    const labelLength = view.getUint8(position);
-
-    if (labelLength >= 0xc0 /** 192 */) {
-      // Handle message compression.
-
-      const compressionPointer = (labelLength << 8) +
-        view.getUint8(position + 1) - 0xC000;
-
-      const { labels: compressedLabels } = decodeLabels(
-        message,
-        compressionPointer,
-      );
-
-      labels.push(...compressedLabels);
-
-      position += 2;
-
-      return { labels, nextPosition: position };
-    }
-
-    if (position + labelLength > message.byteLength) {
-      throw new Error(
-        `Expected a string of ${labelLength} bytes length, but there are only ${
-          message.byteLength - position
-        } bytes left.`,
-      );
-    }
-
-    const label: string[] = [];
-
-    for (let i = position + 1; i <= position + labelLength; i++) {
-      label.push(String.fromCharCode(message[i]));
-    }
-
-    labels.push(label.join(""));
-
-    position += 1 + labelLength;
-
-    continue;
-  }
-
-  return { labels, nextPosition: position + 1 };
-}
-
-/* QUESTION SECTION see RFC 1035 section 4.1.2
-
-																 1  1  1  1  1  1
-	0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-|                                               |
-/                     QNAME                     /
-/                                               /
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-|                     QTYPE                     |
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-|                     QCLASS                    |
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-
-*/
-
-/** A DNS Resource Record type. Only record types relevant to multicast DNS are described here. */
-enum ResourceType {
-  /** a host address */
-  A = 1,
-  /** a domain name pointer */
-  PTR = 12,
-  /** text strings */
-  TXT = 16,
-  /** A IPv6 host address*/
-  AAAA = 28,
-  /** A service */
-  SRV = 33,
-  /** What is this. */
-  NSEC = 47,
-  /** A request for all records */
-  ALL = 255,
-}
-
-type DnsQuestionSection = {
-  /** A domain name represented as a sequence of labels */
-  QNAME: string;
-  /** The type of the query. */
-  QTYPE: ResourceType;
-  /** The class of the query */
-  QCLASS: DnsClass;
-};
-
-export function decodeQuestion(
-  message: Uint8Array,
-  startPosition: number,
-): { result: DnsQuestionSection; nextPosition: number } {
-  const dataView = new DataView(message.buffer);
-
-  const { labels, nextPosition } = decodeLabels(message, startPosition);
-
-  const qType = dataView.getUint16(nextPosition);
-  const qClass = dataView.getUint16(nextPosition + 2);
-
-  return {
-    result: {
-      QNAME: labels.join("."),
-      QTYPE: qType,
-      QCLASS: qClass,
-    },
-    nextPosition: nextPosition + 4,
-  };
-}
-
-/* Resource record format - see RFC 1035 section 4.1.3
-
-                                1  1  1  1  1  1
-  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-|                                               |
-/                                               /
-/                      NAME                     /
-|                                               |
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-|                      TYPE                     |
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-|                     CLASS                     |
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-|                      TTL                      |
-|                                               |
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-|                   RDLENGTH                    |
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
-/                     RDATA                     /
-/                                               /
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-*/
-
-interface ResourceRecordUnknown {
-  NAME: string;
-  TYPE: ResourceType;
-  CLASS: DnsClass;
-  TTL: number;
-  RDLENGTH: number;
-  RDATA: unknown;
-}
-
-interface ResourceRecordA extends ResourceRecordUnknown {
-  TYPE: 1;
-  RDATA: string;
-}
-
-interface ResourceRecordPTR extends ResourceRecordUnknown {
-  TYPE: 12;
-  RDATA: string;
-}
-
-interface ResourceRecordTXT extends ResourceRecordUnknown {
-  type: 16;
-  RDATA: string;
-}
-
-interface ResourceRecordAAAA extends ResourceRecordUnknown {
-  type: 28;
-  RDATA: string;
-}
-
-interface ResourceRecordSRV extends ResourceRecordUnknown {
-  type: 33;
-  RDATA: {
-    priority: number;
-    weight: number;
-    port: number;
-    target: string;
-  };
-}
-
-interface ResourceRecordNSEC extends ResourceRecordUnknown {
-  TYPE: 47;
-  RDATA: {
-    nextDomainName: string;
-    types: number[];
-  };
-}
-
-interface ResourceRecordAny extends ResourceRecordUnknown {
-  RDATA: Uint8Array;
-}
-
-type ResourceRecord =
-  | ResourceRecordA
-  | ResourceRecordPTR
-  | ResourceRecordTXT
-  | ResourceRecordAAAA
-  | ResourceRecordSRV
-  | ResourceRecordNSEC
-  | ResourceRecordAny;
-
-export function decodeRdata(
-  type: ResourceType,
-  message: Uint8Array,
-  rdataPosition: number,
-  rdataLength: number,
-): ResourceRecord["RDATA"] {
-  switch (type) {
-    case ResourceType.A: {
-      return `${message[rdataPosition]}.${message[rdataPosition + 1]}.${
-        message[rdataPosition] + 2
-      }.${message[rdataPosition] + 3}`;
-    }
-
-    case ResourceType.PTR: {
-      return decodeLabels(message, rdataPosition).labels.join(".");
-    }
-
-    case ResourceType.TXT: {
-      return decodeLabels(message, rdataPosition).labels[0];
-    }
-
-    case ResourceType.AAAA: {
-      const rawView = new DataView(message.buffer);
-
-      const parts: string[] = [];
-
-      for (let i = rdataPosition; i < rdataPosition + rdataLength; i += 2) {
-        const part = rawView.getUint16(i, false);
-
-        parts.push(part.toString(16));
-      }
-
-      return parts.join(":").replace(/(^|:)0(:0)*:0(:|$)/, "$1::$3").replace(
-        /:{3,4}/,
-        "::",
-      );
-    }
-
-    case ResourceType.SRV: {
-      const view = new DataView(message.buffer);
-
-      return {
-        priority: view.getUint16(rdataPosition, false),
-        weight: view.getUint16(rdataPosition + 2, false),
-        port: view.getUint16(rdataPosition + 4, false),
-        target: decodeLabels(message, rdataPosition + 6).labels.join("."),
-      };
-    }
-
-    case ResourceType.NSEC: {
-      const view = new DataView(message.buffer);
-
-      const { labels, nextPosition } = decodeLabels(message, rdataPosition);
-
-      const windowBlock = view.getUint8(nextPosition); //
-      const windowBlockLength = view.getUint8(nextPosition + 1);
-
-      // Ignore rrtypes over 255 (only implementing the restricted form)
-      // Bitfield length must always be < 32, otherwise skip parsing
-      if (windowBlock !== 0 || windowBlockLength > 32) {
-        return message.subarray(rdataPosition, rdataPosition + rdataLength);
-      }
-
-      const typesList = [];
-
-      for (let i = 0; i < windowBlockLength; i++) {
-        const mask = view.getUint8(nextPosition + 2 + i);
-
-        if (mask === 0) {
-          continue;
-        }
-
-        for (let bit = 0; bit < 8; bit++) {
-          if (mask & 1 << bit) {
-            const rrtype = 8 * i + (7 - bit);
-            typesList.push(rrtype);
-          }
-        }
-      }
-
-      return {
-        nextDomainName: labels.join("."),
-        types: typesList,
-      };
-    }
-
-    default:
-      return message.subarray(rdataPosition, rdataPosition + rdataLength);
-  }
-}
-
-export function decodeResourceRecord(
-  message: Uint8Array,
-  startPosition: number,
-): {
-  result: ResourceRecord;
-  nextPosition: number;
-} {
-  const dataView = new DataView(message.buffer);
-
-  const { labels, nextPosition } = decodeLabels(message, startPosition);
-
-  const resourceType = dataView.getUint16(nextPosition);
-  const resourceClass = dataView.getUint16(nextPosition + 2);
-  const resourceTTL = dataView.getUint32(nextPosition + 4);
-  const rdataLength = dataView.getUint16(nextPosition + 8);
-
-  const decodedData = decodeRdata(
-    resourceType,
-    message,
-    nextPosition + 10,
-    rdataLength,
-  );
-
-  return {
-    result: {
-      NAME: labels.join("."),
-      TYPE: resourceType,
-      CLASS: resourceClass,
-      TTL: resourceTTL,
-      RDLENGTH: rdataLength,
-      RDATA: decodedData,
-    } as ResourceRecord,
-    nextPosition: nextPosition + 10 + rdataLength,
-  };
-}
-
-/*
-
-+---------------------+
-|        Header       |
-+---------------------+
-|       Question      | the question for the name server
-+---------------------+
-|        Answer       | RRs answering the question
-+---------------------+
-|      Authority      | RRs pointing toward an authority
-+---------------------+
-|      Additional     | RRs holding additional information
-+---------------------+
-
-*/
-
-type DnsMessage = {
-  header: DnsMessageHeader;
-  question: DnsQuestionSection[];
-  answer: ResourceRecord[];
-  authority: ResourceRecord[];
-  additional: ResourceRecord[];
-};
-
+import {
+  DnsMessage,
+  DnsMessageHeader,
+  DnsQuestionSection,
+  ResourceRecord,
+  ResourceRecordTXT,
+  ResourceType,
+} from "./types.ts";
+
+/** Decode a DNS message from bytes */
 export function decodeMessage(message: Uint8Array): DnsMessage {
   const header = decodeHeader(message);
 
@@ -583,4 +109,319 @@ export function decodeMessage(message: Uint8Array): DnsMessage {
     authority,
     additional,
   };
+}
+
+export function decodeHeader(message: Uint8Array): DnsMessageHeader {
+  const dataView = new DataView(message.buffer);
+  const id = dataView.getUint16(0, false);
+  const flags = dataView.getUint16(2, false);
+  const qdCount = dataView.getUint16(4, false);
+  const anCount = dataView.getUint16(6, false);
+  const nsCount = dataView.getUint16(8, false);
+  const arCount = dataView.getUint16(10, false);
+
+  return {
+    ID: id,
+    QR: (flags & 0x8000) >> 15,
+    OPCODE: (flags & 0x7800) >> 11,
+    AA: (flags & 0x400) >> 10,
+    TC: (flags & 0x200) >> 9,
+    RD: (flags & 0x100) >> 8,
+    RA: (flags & 0x80) >> 7,
+    Z: (flags & 0x40) >> 6,
+    AD: (flags & 0x20) >> 5,
+    CD: (flags & 0x10) >> 4,
+    RCODE: (flags & 0xF),
+    QDCOUNT: qdCount,
+    ANCOUNT: anCount,
+    NSCOUNT: nsCount,
+    ARCOUNT: arCount,
+  };
+}
+
+export function decodeQuestion(
+  message: Uint8Array,
+  /** The position of this question within its DNS message's bytes */
+  startPosition: number,
+): {
+  result: DnsQuestionSection;
+  /**  The position immediately following this question  */
+  nextPosition: number;
+} {
+  const dataView = new DataView(message.buffer);
+
+  const { labels, nextPosition } = decodeLabels(message, startPosition);
+
+  const qType = dataView.getUint16(nextPosition);
+  const qClass = dataView.getUint16(nextPosition + 2);
+
+  return {
+    result: {
+      QNAME: labels,
+      QTYPE: qType,
+      QCLASS: qClass,
+    },
+    nextPosition: nextPosition + 4,
+  };
+}
+
+export function decodeResourceRecord(
+  message: Uint8Array,
+  /** The position of this question within its DNS message's bytes */
+  startPosition: number,
+): {
+  result: ResourceRecord;
+  /** The position immediately following this resource record */
+  nextPosition: number;
+} {
+  const dataView = new DataView(message.buffer);
+
+  const { labels, nextPosition } = decodeLabels(message, startPosition);
+
+  const resourceType = dataView.getUint16(nextPosition);
+  const resourceClass = dataView.getUint16(nextPosition + 2);
+  const resourceTTL = dataView.getUint32(nextPosition + 4);
+  const rdataLength = dataView.getUint16(nextPosition + 8);
+
+  const decodedData = decodeRdata(
+    resourceType,
+    message,
+    nextPosition + 10,
+    rdataLength,
+  );
+
+  return {
+    result: {
+      NAME: labels,
+      TYPE: resourceType,
+      CLASS: resourceClass,
+      TTL: resourceTTL,
+      RDLENGTH: rdataLength,
+      RDATA: decodedData,
+    } as ResourceRecord,
+    nextPosition: nextPosition + 10 + rdataLength,
+  };
+}
+
+export function decodeRdata(
+  type: ResourceType,
+  message: Uint8Array,
+  rdataPosition: number,
+  rdataLength: number,
+): ResourceRecord["RDATA"] {
+  switch (type) {
+    case ResourceType.A: {
+      return [
+        `${message[rdataPosition]}`,
+        `${message[rdataPosition + 1]}`,
+        `${message[rdataPosition + 2]} `,
+        `${message[rdataPosition + 3]}`,
+      ];
+    }
+
+    case ResourceType.PTR: {
+      return decodeLabels(message, rdataPosition).labels;
+    }
+
+    case ResourceType.TXT: {
+      const view = new DataView(message.buffer);
+
+      if (rdataLength === 1) {
+        return {};
+      }
+
+      const attributes: ResourceRecordTXT["RDATA"] = {};
+
+      let attrPosition = rdataPosition;
+
+      while (attrPosition < rdataPosition + rdataLength) {
+        /** The length of this attribute, including value (if present) */
+        const txtLength = view.getUint8(attrPosition);
+
+        /** To build the attribute name with. */
+        let currentAttribute = "";
+        /** Whether we've passed the = symbol in this attribute yet. */
+        let passedEqual = false;
+        let value: Uint8Array | true | null = true;
+
+        for (let i = 1; i <= txtLength; i++) {
+          if (passedEqual) {
+            // Pull the remaining bytes of this attribute out.
+
+            value = message.subarray(
+              attrPosition + i,
+              attrPosition + txtLength + 1,
+            );
+
+            break;
+          }
+
+          const char = String.fromCharCode(message[attrPosition + i]);
+
+          if (char === "=") {
+            // Stop building the attribute name here.
+            passedEqual = true;
+            // If there won't be a next iteration of this loop
+            // (and thus no assignment of a value to this attribute)
+            // then this attribute is something=, indicating a null value
+            // for this attribute.
+            value = null;
+            continue;
+          }
+
+          if (!passedEqual) {
+            currentAttribute = currentAttribute + (char);
+          }
+        }
+
+        attributes[currentAttribute] = value;
+
+        attrPosition = attrPosition + txtLength + 1;
+      }
+
+      return attributes;
+    }
+
+    case ResourceType.AAAA: {
+      const rawView = new DataView(message.buffer);
+
+      const parts: string[] = [];
+
+      for (let i = rdataPosition; i < rdataPosition + rdataLength; i += 2) {
+        const part = rawView.getUint16(i, false);
+
+        parts.push(part.toString(16));
+      }
+
+      return parts.join(":").replace(/(^|:)0(:0)*:0(:|$)/, "$1::$3").replace(
+        /:{3,4}/,
+        "::",
+      );
+    }
+
+    case ResourceType.SRV: {
+      const view = new DataView(message.buffer);
+
+      return {
+        priority: view.getUint16(rdataPosition, false),
+        weight: view.getUint16(rdataPosition + 2, false),
+        port: view.getUint16(rdataPosition + 4, false),
+        target: decodeLabels(message, rdataPosition + 6).labels,
+      };
+    }
+
+    case ResourceType.NSEC: {
+      const view = new DataView(message.buffer);
+
+      const { labels, nextPosition } = decodeLabels(message, rdataPosition);
+
+      const windowBlock = view.getUint8(nextPosition); //
+      const windowBlockLength = view.getUint8(nextPosition + 1);
+
+      // Ignore rrtypes over 255 (only implementing the restricted form)
+      // Bitfield length must always be < 32, otherwise skip parsing
+      if (windowBlock !== 0 || windowBlockLength > 32) {
+        return message.subarray(rdataPosition, rdataPosition + rdataLength);
+      }
+
+      const typesList = [];
+
+      for (let i = 0; i < windowBlockLength; i++) {
+        const mask = view.getUint8(nextPosition + 2 + i);
+
+        if (mask === 0) {
+          continue;
+        }
+
+        for (let bit = 0; bit < 8; bit++) {
+          if (mask & 1 << bit) {
+            const rrtype = 8 * i + (7 - bit);
+            typesList.push(rrtype);
+          }
+        }
+      }
+
+      return {
+        nextDomainName: labels,
+        types: typesList,
+      };
+    }
+
+    default:
+      return message.subarray(rdataPosition, rdataPosition + rdataLength);
+  }
+}
+
+function decodeLabels(
+  message: Uint8Array,
+  startPosition: number,
+): {
+  labels: string[];
+  nextPosition: number;
+} {
+  const labels: string[] = [];
+
+  let position = startPosition;
+
+  const view = new DataView(message.buffer);
+
+  while (view.getUint8(position) !== 0) {
+    const labelLength = view.getUint8(position);
+
+    if (labelLength >= 0xc0 /** 192 */) {
+      /*
+
+      The pointer takes the form of a two octet sequence:
+
+          +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+          | 1  1|                OFFSET                   |
+          +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+
+      The first two bits are ones.  This allows a pointer to be distinguished
+      from a label, since the label must begin with two zero bits because
+      labels are restricted to 63 octets or less.  (The 10 and 01 combinations
+      are reserved for future use.)  The OFFSET field specifies an offset from
+      the start of the message (i.e., the first octet of the ID field in the
+      domain header).  A zero offset specifies the first byte of the ID field,
+      etc.
+
+      */
+
+      const compressionPointer = (labelLength << 8) +
+        view.getUint8(position + 1) - 0xC000;
+
+      const { labels: compressedLabels } = decodeLabels(
+        message,
+        compressionPointer,
+      );
+
+      labels.push(...compressedLabels);
+
+      position += 2;
+
+      return { labels, nextPosition: position };
+    }
+
+    if (position + labelLength > message.byteLength) {
+      throw new Error(
+        `Expected a string of ${labelLength} bytes length, but there are only ${
+          message.byteLength - position
+        } bytes left.`,
+      );
+    }
+
+    const label: string[] = [];
+
+    for (let i = position + 1; i <= position + labelLength; i++) {
+      label.push(String.fromCharCode(message[i]));
+    }
+
+    labels.push(label.join(""));
+
+    position += 1 + labelLength;
+
+    continue;
+  }
+
+  return { labels, nextPosition: position + 1 };
 }
