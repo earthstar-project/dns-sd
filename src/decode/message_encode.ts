@@ -399,8 +399,12 @@ function encodeResourceRecord(
   const otherBytes = new Uint8Array(10);
   const otherDataView = new DataView(otherBytes.buffer);
 
+  const classWithCacheFlushBit = resourceRecord.isUnique
+    ? resourceRecord.CLASS | 0x8000
+    : resourceRecord.CLASS;
+
   otherDataView.setUint16(0, resourceRecord.TYPE);
-  otherDataView.setUint16(2, resourceRecord.CLASS);
+  otherDataView.setUint16(2, classWithCacheFlushBit);
   otherDataView.setUint32(4, resourceRecord.TTL);
   otherDataView.setUint16(8, resourceRecord.RDLENGTH);
 

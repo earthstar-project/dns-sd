@@ -67,7 +67,7 @@ export enum RcodeFlag {
 export type DnsMessageHeader = {
   /** A 16 bit identifier assigned by the program. Copied to corresponding replies.*/
   ID: number;
-  /** Is this message a query or a response? */
+  /** Is this message a query or a response? 0 is Query, 1 is Response. */
   QR: Flag;
   /** The kind of query in this message. */
   OPCODE: OpcodeFlag;
@@ -127,8 +127,8 @@ export enum ResourceType {
   SRV = 33,
   /** Authenticated proof of the non-existence of DNS owner names and types */
   NSEC = 47,
-  /** A request for all records */
-  ALL = 255,
+  /** A request for any records */
+  ANY = 255,
 }
 
 export type DnsQuestionSection = {
@@ -177,6 +177,8 @@ export interface ResourceRecordUnknown {
   RDLENGTH: number;
   /** Resource data */
   RDATA: unknown;
+  /** Whether the cache-flush bit was set on this record */
+  isUnique: boolean;
 }
 
 export interface ResourceRecordA extends ResourceRecordUnknown {

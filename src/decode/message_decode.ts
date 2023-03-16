@@ -194,10 +194,11 @@ export function decodeResourceRecord(
     result: {
       NAME: labels,
       TYPE: resourceType,
-      CLASS: resourceClass,
+      CLASS: resourceClass & ~0x8000,
       TTL: resourceTTL,
       RDLENGTH: rdataLength,
       RDATA: decodedData,
+      isUnique: !!(resourceClass & 0x8000),
     } as ResourceRecord,
     nextPosition: nextPosition + 10 + rdataLength,
   };
