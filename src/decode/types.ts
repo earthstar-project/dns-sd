@@ -171,7 +171,7 @@ export interface ResourceRecordUnknown {
   TYPE: ResourceType;
   /** The class of the answer */
   CLASS: DnsClass;
-  /** Length of time this record should be considered valid for. */
+  /** Length of time **in seconds** this record should be considered valid for. */
   TTL: number;
   /** Length of resource data */
   RDLENGTH: number;

@@ -213,10 +213,10 @@ export function decodeRdata(
   switch (type) {
     case ResourceType.A: {
       return [
-        `${message[rdataPosition]}`,
-        `${message[rdataPosition + 1]}`,
-        `${message[rdataPosition + 2]} `,
-        `${message[rdataPosition + 3]}`,
+        message[rdataPosition],
+        message[rdataPosition + 1],
+        message[rdataPosition + 2],
+        message[rdataPosition + 3],
       ];
     }
 
