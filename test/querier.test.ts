@@ -864,3 +864,9 @@ Deno.test({
     query.end();
   },
 });
+
+Deno.test({
+  name:
+    "Expires a record for which it has seen 3 queries issued but no response seen",
+  fn: () => {},
+});
