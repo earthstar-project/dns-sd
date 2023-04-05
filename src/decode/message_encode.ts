@@ -15,7 +15,6 @@ import {
   ResourceRecordA,
   ResourceRecordNSEC,
   ResourceRecordSRV,
-  ResourceType,
 } from "./types.ts";
 import { concat } from "https://deno.land/std@0.177.0/bytes/mod.ts";
 

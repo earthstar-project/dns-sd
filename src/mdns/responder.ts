@@ -23,11 +23,18 @@ import {
 import { MulticastInterface } from "./multicast_interface.ts";
 
 type RespondOpts = {
+  /** The DNS records a responder wants to be authoritative for */
   proposedRecords: ResourceRecord[];
   minterface: MulticastInterface;
   signal?: AbortSignal;
 };
 
+/** Run a multicast DNS responder.
+ *
+ * Returns a promise that will reject when:
+ * - Probing for proposed records fails
+ * - Another responder starts responding with records our responder previously lay claim to.
+ */
 export async function respond(opts: RespondOpts) {
   let aborted = false;
 
@@ -49,8 +56,7 @@ export async function respond(opts: RespondOpts) {
 
   if (opts.signal) {
     opts.signal.addEventListener("abort", () => {
-      // Send goodbye packets
-
+      // Send goodbye packets for all our records.
       opts.minterface.send({
         header: {
           ID: 0,
@@ -103,6 +109,7 @@ export async function respond(opts: RespondOpts) {
       }
 
       if (message.header.QR === 0) {
+        // This is a query
         const answers = answersFor(
           message.question,
           opts.proposedRecords,
@@ -110,17 +117,15 @@ export async function respond(opts: RespondOpts) {
           opts.minterface.family,
         );
 
+        // Make sure TTL is good for all records.
+        // 120 for A, AAAA, SRV and PTR.
         const answersWithTTL = alterTTLs(answers);
 
-        // Check if the name matches anything else we hold (non-PTR)
-        // If we do, and there are zero answers we can maybe send a negative response
-        // If they are asking for A/AAAA (check if interface is ipv4/v6)
-
         if (answers.length > 0 && message.authority.length === 0) {
-          // Make sure TTL is good. 120 for A, AAAA, SRV and PTR.
+          // This is a standard query
 
           // If we can answer all questions.
-          // and all answers are unique.
+          // and all answers are unique...
           if (
             canAnswerAllQuestions(message.question, opts.proposedRecords) &&
             allAnswersAreUnique(answersWithTTL)
@@ -137,10 +142,10 @@ export async function respond(opts: RespondOpts) {
 
           sender.dispatchImmediately(answersWithTTL);
         }
-
-        // TODO: If it knows there are no records for this, send NSEC.
       } else {
+        // This a response
         for (const answer of message.answer) {
+          // Check if this response contains records which are the same as our own
           for (const ourRecord of opts.proposedRecords) {
             const rdataIsSame = recordSort(answer, ourRecord) === 0;
             const nameIsSame = answer.NAME.join(".").toUpperCase() ===
@@ -152,6 +157,8 @@ export async function respond(opts: RespondOpts) {
               // Rescue the records and send them out.
               sender.addAnswers([ourRecord]);
             } else if (isConflicting(answer, ourRecord)) {
+              // Someone else is sending out records that conflict with ours!
+              // We need to start over.
               if (isConflicting(answer, ourRecord)) {
                 respondPromise.reject(
                   "Conflicting record was received from another host.",
@@ -167,13 +174,21 @@ export async function respond(opts: RespondOpts) {
   return respondPromise;
 }
 
+/** Returns answers (as resource records) for a given set of questions.
+ *
+ * Applies known answer suppression, and also adds NSEC records for questions to which we know there is no answer.
+ */
 function answersFor(
   questions: DnsQuestionSection[],
+  /** The pool of potential answers to select from. */
   answers: ResourceRecord[],
+  /** Answers the querying party already knows. */
   knownAnswers: ResourceRecord[],
+  /** The family of IP addresses used by us. */
   family: "IPv4" | "IPv6",
 ) {
   const validAnswers = new Set<ResourceRecord>();
+  /** A map of names to resource types we actually hold. */
   const heldTypesForNsec = new Map<string, Set<ResourceType>>();
 
   for (const question of questions) {
@@ -186,6 +201,7 @@ function answersFor(
       if (isRightType && isRightName) {
         let shouldSuppress = false;
 
+        // Check if we should suppress this answer.
         for (const knownAnswer of knownAnswers) {
           const isKnownName = record.NAME.join(".").toUpperCase() ===
             knownAnswer.NAME.join(".").toUpperCase();
@@ -212,7 +228,6 @@ function answersFor(
         (question.QTYPE === ResourceType.A && family === "IPv6");
 
       if (isRightName && !isRightType && record.isUnique && !unknowableByUs) {
-        // Add to NSEC held
         const name = question.QNAME.join(".");
 
         const resourceTypesForName = heldTypesForNsec.get(name);
@@ -227,7 +242,7 @@ function answersFor(
   }
 
   for (const [name, heldTypes] of heldTypesForNsec) {
-    // Make an NSEC record
+    // Make an NSEC record to add to valid answers
     const nsecRecord: ResourceRecordNSEC = {
       CLASS: DnsClass.IN,
       isUnique: false,
@@ -247,6 +262,7 @@ function answersFor(
   return Array.from(validAnswers);
 }
 
+/** Normalise TTLs of specific types of resource records  */
 function alterTTLs(records: ResourceRecord[]) {
   const alteredRecords: ResourceRecord[] = [];
 
@@ -277,6 +293,10 @@ function alterTTLs(records: ResourceRecord[]) {
   return alteredRecords;
 }
 
+/** This thing can aggregate several answers (given over time) into a single DNS message.
+ *
+ * It also keeps track of messages sent in the last second so that it won't send them again and flood the network.
+ */
 class AggregatingScheduledSend {
   private minterface: MulticastInterface;
   private queuedAnswers = new Set<ResourceRecord>();
@@ -285,7 +305,6 @@ class AggregatingScheduledSend {
   private scheduledSend: null | number = null;
   /** Timeout IDs for removing records from answers sent in the last second*/
   private removalTimers: number[] = [];
-  // private stopped = false;
 
   constructor(minterface: MulticastInterface) {
     this.minterface = minterface;
@@ -301,6 +320,7 @@ class AggregatingScheduledSend {
     }, this.getNextTimeout());
   }
 
+  /** Dispatch some answers immediately, used when sending out stuff like A records. */
   dispatchImmediately(answers: ResourceRecord[]) {
     const answersToSend = new Set<ResourceRecord>();
 
@@ -350,6 +370,7 @@ class AggregatingScheduledSend {
     this.onSentAnswers(answers);
   }
 
+  /** When some answers were sent, we need to remember that we did for one second so that we don't send them again during that period. */
   private onSentAnswers(sentAnswers: ResourceRecord[]) {
     for (const answer of sentAnswers) {
       this.answersSentInLastSecond.add(answer);
@@ -401,6 +422,10 @@ class AggregatingScheduledSend {
     this.minterface.send(response);
   }
 
+  /** Queue answers for sending.
+   *
+   * Does not queue an answer if it was sent in the last second
+   */
   addAnswers(records: ResourceRecord[]) {
     for (const record of records) {
       if (this.answersSentInLastSecond.has(record)) {
@@ -415,6 +440,7 @@ class AggregatingScheduledSend {
     }
   }
 
+  /** Cancel this thing, clear all the timers. */
   stop() {
     if (this.scheduledSend) {
       clearTimeout(this.scheduledSend);
@@ -439,11 +465,16 @@ type ProbeOpts = {
 
 type ProbeResult = "success" | "conflict";
 
+/** Probes the network for another peer who might have already claimed authority for certain records.
+ *
+ * Returns a promise indicating whether probing was successful or if a conflict was found.
+ */
 function probe(opts: ProbeOpts): Promise<ProbeResult> {
   const promise = deferred<ProbeResult>();
 
   const desiredNames = desiredNamesFromRecords(opts.proposedRecords);
 
+  // Create questions to be sent in the probe message.
   const questions = desiredNames.map((name) => ({
     QNAME: name,
     QTYPE: ResourceType.ANY,
@@ -572,6 +603,10 @@ function probe(opts: ProbeOpts): Promise<ProbeResult> {
 
 // Announce
 
+/** Announce (unsolicited) the records we are claiming authority to.
+ *
+ * Returns a promise which resolves after two announcements have been broadcast.
+ */
 async function announce(opts: RespondOpts) {
   const announceMessage: DnsMessage = {
     header: {
@@ -621,6 +656,7 @@ async function announce(opts: RespondOpts) {
 
 // Conflict resolving stuff
 
+/** Lexicographically compare two arrays of resource records */
 function sortManyRecords(
   aRecords: ResourceRecord[],
   bRecords: ResourceRecord[],
@@ -629,12 +665,14 @@ function sortManyRecords(
   const bSorted = bRecords.toSorted(recordSort);
 
   for (let i = 0; i < Math.max(aSorted.length, bSorted.length); i++) {
+    // This means b has more records than a, so b comes lexicographically later.
     if (i >= aRecords.length) {
       return -1;
     }
 
     const aRecord = aSorted[i];
 
+    // This means a has more records than b, so a comes lexicographically later.
     if (i >= bSorted.length) {
       return 1;
     }
@@ -652,9 +690,11 @@ function sortManyRecords(
     }
   }
 
+  // Fun fact: if two peers have exactly the same set of records, this isn't a conflict, but indicates some fault-tolerant use of mDNS.
   return 0;
 }
 
+/** Compare two records to determine lexicographical order. */
 function recordSort(a: ResourceRecord, b: ResourceRecord): 1 | 0 | -1 {
   if (a.CLASS < b.CLASS) {
     return -1;
@@ -780,6 +820,10 @@ function hasAnyAnswersForQuestions(
   return false;
 }
 
+/** Checks if two records conflict with each other.
+ *
+ * This is when the have the same name and type, but different RDATA.
+ */
 function isConflicting(a: ResourceRecord, b: ResourceRecord) {
   const isSameType = a.TYPE === a.TYPE;
 
@@ -822,6 +866,7 @@ function desiredNamesFromRecords(records: ResourceRecord[]): string[][] {
 
 // Slightly different encoding methods (which do not support decompression)
 // Which are only used to compare RDATA.
+// Duplication over over-abstraction, man
 
 function encodeRdataPTR(
   labelSeq: string[],
