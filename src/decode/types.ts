@@ -194,7 +194,7 @@ export interface ResourceRecordPTR extends ResourceRecordUnknown {
 }
 
 export interface ResourceRecordTXT extends ResourceRecordUnknown {
-  type: ResourceType.TXT;
+  TYPE: ResourceType.TXT;
   RDATA: Record<
     string,
     /** Uint8Array is a defined value. `true` indicates presence of attribute with no value. `null` indicates presence of attribute with empty value. */
@@ -203,13 +203,13 @@ export interface ResourceRecordTXT extends ResourceRecordUnknown {
 }
 
 export interface ResourceRecordAAAA extends ResourceRecordUnknown {
-  type: ResourceType.AAAA;
+  TYPE: ResourceType.AAAA;
   /** IPv6 address */
   RDATA: string;
 }
 
 export interface ResourceRecordSRV extends ResourceRecordUnknown {
-  type: ResourceType.SRV;
+  TYPE: ResourceType.SRV;
   RDATA: {
     priority: number;
     weight: number;
