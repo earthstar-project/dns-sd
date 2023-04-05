@@ -67,7 +67,7 @@ export enum RcodeFlag {
 export type DnsMessageHeader = {
   /** A 16 bit identifier assigned by the program. Copied to corresponding replies.*/
   ID: number;
-  /** Is this message a query or a response? */
+  /** Is this message a query or a response? 0 is Query, 1 is Response. */
   QR: Flag;
   /** The kind of query in this message. */
   OPCODE: OpcodeFlag;
@@ -127,8 +127,8 @@ export enum ResourceType {
   SRV = 33,
   /** Authenticated proof of the non-existence of DNS owner names and types */
   NSEC = 47,
-  /** A request for all records */
-  ALL = 255,
+  /** A request for any records */
+  ANY = 255,
 }
 
 export type DnsQuestionSection = {
@@ -171,12 +171,14 @@ export interface ResourceRecordUnknown {
   TYPE: ResourceType;
   /** The class of the answer */
   CLASS: DnsClass;
-  /** Length of time this record should be considered valid for. */
+  /** Length of time **in seconds** this record should be considered valid for. */
   TTL: number;
   /** Length of resource data */
   RDLENGTH: number;
   /** Resource data */
   RDATA: unknown;
+  /** Whether the cache-flush bit was set on this record */
+  isUnique: boolean;
 }
 
 export interface ResourceRecordA extends ResourceRecordUnknown {
@@ -192,7 +194,7 @@ export interface ResourceRecordPTR extends ResourceRecordUnknown {
 }
 
 export interface ResourceRecordTXT extends ResourceRecordUnknown {
-  type: ResourceType.TXT;
+  TYPE: ResourceType.TXT;
   RDATA: Record<
     string,
     /** Uint8Array is a defined value. `true` indicates presence of attribute with no value. `null` indicates presence of attribute with empty value. */
@@ -201,13 +203,13 @@ export interface ResourceRecordTXT extends ResourceRecordUnknown {
 }
 
 export interface ResourceRecordAAAA extends ResourceRecordUnknown {
-  type: ResourceType.AAAA;
+  TYPE: ResourceType.AAAA;
   /** IPv6 address */
   RDATA: string;
 }
 
 export interface ResourceRecordSRV extends ResourceRecordUnknown {
-  type: ResourceType.SRV;
+  TYPE: ResourceType.SRV;
   RDATA: {
     priority: number;
     weight: number;

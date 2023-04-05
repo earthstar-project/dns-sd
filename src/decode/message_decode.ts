@@ -194,10 +194,11 @@ export function decodeResourceRecord(
     result: {
       NAME: labels,
       TYPE: resourceType,
-      CLASS: resourceClass,
+      CLASS: resourceClass & ~0x8000,
       TTL: resourceTTL,
       RDLENGTH: rdataLength,
       RDATA: decodedData,
+      isUnique: !!(resourceClass & 0x8000),
     } as ResourceRecord,
     nextPosition: nextPosition + 10 + rdataLength,
   };
@@ -212,10 +213,10 @@ export function decodeRdata(
   switch (type) {
     case ResourceType.A: {
       return [
-        `${message[rdataPosition]}`,
-        `${message[rdataPosition + 1]}`,
-        `${message[rdataPosition + 2]} `,
-        `${message[rdataPosition + 3]}`,
+        message[rdataPosition],
+        message[rdataPosition + 1],
+        message[rdataPosition + 2],
+        message[rdataPosition + 3],
       ];
     }
 

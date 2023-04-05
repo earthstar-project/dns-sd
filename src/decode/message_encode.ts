@@ -399,8 +399,12 @@ function encodeResourceRecord(
   const otherBytes = new Uint8Array(10);
   const otherDataView = new DataView(otherBytes.buffer);
 
+  const classWithCacheFlushBit = resourceRecord.isUnique
+    ? resourceRecord.CLASS | 0x8000
+    : resourceRecord.CLASS;
+
   otherDataView.setUint16(0, resourceRecord.TYPE);
-  otherDataView.setUint16(2, resourceRecord.CLASS);
+  otherDataView.setUint16(2, classWithCacheFlushBit);
   otherDataView.setUint32(4, resourceRecord.TTL);
   otherDataView.setUint16(8, resourceRecord.RDLENGTH);
 
@@ -410,7 +414,7 @@ function encodeResourceRecord(
   };
 }
 
-function encodeRdataA(
+export function encodeRdataA(
   resourceRecord: ResourceRecordA,
 ): Uint8Array {
   const aRecordBytes = new Uint8Array(4);
@@ -443,7 +447,7 @@ function encodeRdataPTR(
   };
 }
 
-function encodeRdataTXT(
+export function encodeRdataTXT(
   attributes: Record<string, Uint8Array | true | null>,
 ): Uint8Array {
   if (Object.keys(attributes).length === 0) {
@@ -507,7 +511,7 @@ function encodeRdataTXT(
   return concat(...attributesBytes);
 }
 
-function encodeRdataAAAA(
+export function encodeRdataAAAA(
   ipv6Addr: string,
 ): Uint8Array {
   const addr = "0" + ipv6Addr;
@@ -597,7 +601,7 @@ function encodeRdataNSEC(
   for (let i = 0; i < masks.length; i++) {
     const mask = masks[i];
 
-    maskView.setUint8(i + 2, mask);
+    maskView.setUint8(i + 1, mask);
   }
 
   return {
