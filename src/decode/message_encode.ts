@@ -415,7 +415,7 @@ function encodeResourceRecord(
   };
 }
 
-function encodeRdataA(
+export function encodeRdataA(
   resourceRecord: ResourceRecordA,
 ): Uint8Array {
   const aRecordBytes = new Uint8Array(4);
@@ -448,7 +448,7 @@ function encodeRdataPTR(
   };
 }
 
-function encodeRdataTXT(
+export function encodeRdataTXT(
   attributes: Record<string, Uint8Array | true | null>,
 ): Uint8Array {
   if (Object.keys(attributes).length === 0) {
@@ -512,7 +512,7 @@ function encodeRdataTXT(
   return concat(...attributesBytes);
 }
 
-function encodeRdataAAAA(
+export function encodeRdataAAAA(
   ipv6Addr: string,
 ): Uint8Array {
   const addr = "0" + ipv6Addr;
@@ -602,7 +602,7 @@ function encodeRdataNSEC(
   for (let i = 0; i < masks.length; i++) {
     const mask = masks[i];
 
-    maskView.setUint8(i + 2, mask);
+    maskView.setUint8(i + 1, mask);
   }
 
   return {
