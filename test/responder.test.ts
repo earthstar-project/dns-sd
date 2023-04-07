@@ -264,7 +264,7 @@ Deno.test({
       authority: [],
       additional: [],
     }, {
-      address: "8.8.8.8",
+      hostname: "8.8.8.8",
       port: 5353,
     });
 
@@ -284,14 +284,14 @@ Deno.test({
     // Set up two announcements
     const testDriverWinner = new TestMulticastDriver((msg) => {
       testDriverLoser.sendInboundMessage(msg, {
-        address: "7.7.7.7",
+        hostname: "7.7.7.7",
         port: 5343,
       });
     });
 
     const testDriverLoser = new TestMulticastDriver((msg) => {
       testDriverWinner.sendInboundMessage(msg, {
-        address: "0.0.0.0",
+        hostname: "0.0.0.0",
         port: 5343,
       });
     });
@@ -481,14 +481,14 @@ Deno.test({
     // Set up two announcements
     const testDriverA = new TestMulticastDriver((msg) => {
       testDriverB.sendInboundMessage(msg, {
-        address: "7.7.7.7",
+        hostname: "7.7.7.7",
         port: 5343,
       });
     });
 
     const testDriverB = new TestMulticastDriver((msg) => {
       testDriverA.sendInboundMessage(msg, {
-        address: "0.0.0.0",
+        hostname: "0.0.0.0",
         port: 5343,
       });
     });
@@ -660,7 +660,7 @@ Deno.test({
       authority: [],
       additional: [],
     }, {
-      address: "8.8.8.8",
+      hostname: "8.8.8.8",
       port: 5353,
     });
 
@@ -740,7 +740,7 @@ Deno.test({
       authority: [],
       additional: [],
     }, {
-      address: "9.9.9.9",
+      hostname: "9.9.9.9",
       port: 5353,
     });
 
@@ -828,7 +828,7 @@ Deno.test({
       authority: [proposedARecord],
       additional: [],
     }, {
-      address: "9.9.9.9",
+      hostname: "9.9.9.9",
       port: 5353,
     });
 
@@ -916,7 +916,7 @@ Deno.test({
       authority: [],
       additional: [],
     }, {
-      address: "9.9.9.9",
+      hostname: "9.9.9.9",
       port: 5353,
     });
 
@@ -998,7 +998,7 @@ Deno.test({
       authority: [],
       additional: [],
     }, {
-      address: "9.9.9.9",
+      hostname: "9.9.9.9",
       port: 5353,
     });
 
@@ -1086,7 +1086,7 @@ Deno.test({
       authority: [],
       additional: [],
     }, {
-      address: "9.9.9.9",
+      hostname: "9.9.9.9",
       port: 5353,
     });
 
@@ -1168,7 +1168,7 @@ Deno.test({
       authority: [],
       additional: [],
     }, {
-      address: "9.9.9.9",
+      hostname: "9.9.9.9",
       port: 5353,
     });
 
@@ -1247,7 +1247,7 @@ Deno.test({
       authority: [],
       additional: [],
     }, {
-      address: "9.9.9.9",
+      hostname: "9.9.9.9",
       port: 5353,
     });
 
@@ -1376,7 +1376,7 @@ Deno.test({
       authority: [],
       additional: [],
     }, {
-      address: "9.9.9.9",
+      hostname: "9.9.9.9",
       port: 5353,
     });
 
@@ -1413,7 +1413,7 @@ Deno.test({
       authority: [],
       additional: [],
     }, {
-      address: "9.9.9.9",
+      hostname: "9.9.9.9",
       port: 5353,
     });
 

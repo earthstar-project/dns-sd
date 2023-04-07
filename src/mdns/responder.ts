@@ -98,13 +98,13 @@ export async function respond(opts: RespondOpts) {
 
   // Respond.
   (async () => {
-    for await (const [message, host] of opts.minterface) {
+    for await (const [message, host] of opts.minterface.messages()) {
       if (aborted) {
         break;
       }
 
       // Ignore messages from ourselves
-      if (host.address === opts.minterface.address) {
+      if (host.hostname === opts.minterface.address) {
         continue;
       }
 
@@ -498,13 +498,13 @@ function probe(opts: ProbeOpts): Promise<ProbeResult> {
   // Listen for incoming answers to our probe.
   // AND for other host probing for the same name.
   (async () => {
-    for await (const [message, host] of opts.minterface) {
+    for await (const [message, host] of opts.minterface.messages()) {
       // Is this something we sent ourselves?
       if (firstProbeSent === false) {
         continue;
       }
 
-      if (host.address === opts.minterface.address) {
+      if (host.hostname === opts.minterface.address) {
         continue;
       }
 
@@ -695,7 +695,7 @@ function sortManyRecords(
 }
 
 /** Compare two records to determine lexicographical order. */
-function recordSort(a: ResourceRecord, b: ResourceRecord): 1 | 0 | -1 {
+export function recordSort(a: ResourceRecord, b: ResourceRecord): 1 | 0 | -1 {
   if (a.CLASS < b.CLASS) {
     return -1;
   } else if (a.CLASS > b.CLASS) {

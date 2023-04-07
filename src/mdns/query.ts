@@ -7,13 +7,14 @@ import {
 } from "../decode/types.ts";
 import { FastFIFO } from "../fast_fifo.ts";
 import { MulticastInterface } from "./multicast_interface.ts";
+import { recordSort } from "./responder.ts";
 
 const ONE_SECOND_MS = 1000;
 
 /** The number of milliseconds in an hour. */
 const ONE_HOUR_MS = ONE_SECOND_MS * 60 * 60;
 
-type MdnsQuestion = {
+export type MdnsQuestion = {
   name: string;
   recordType: ResourceType;
 };
@@ -50,7 +51,7 @@ export class Query {
 
     // Long running query for some records.
     (async () => {
-      for await (const [message, host] of multicastInterface) {
+      for await (const [message, host] of multicastInterface.messages()) {
         if (this.ended) {
           break;
         }
@@ -124,12 +125,12 @@ export class Query {
 
   private handleQuery(
     query: DnsMessage,
-    host: { address: string; port: number },
+    host: { hostname: string; port: number },
   ) {
     // It's a query.
 
     // Is this something we sent ourselves?
-    if (host.address === this.minterface.address) {
+    if (host.hostname === this.minterface.address) {
       return;
     }
 
@@ -181,8 +182,11 @@ export class Query {
       }
 
       // It IS a matching record, so add it to our cache.
+
       this.recordCache.addRecord(record);
     }
+
+    console.groupEnd();
   }
 
   /** Sends a DNS query with given questions.
@@ -273,6 +277,14 @@ class RecordCache {
   }
 
   addRecord(record: ResourceRecord) {
+    const expire = () => {
+      this.expireRecord(record);
+    };
+
+    const requery = () => {
+      this.onRequery(record);
+    };
+
     // Handle goodbye packets with a TTL of 0.
     if (record.TTL === 0) {
       // Set to expire in 1 second (section 10.1 of RFC 6762)
@@ -288,14 +300,6 @@ class RecordCache {
       return;
     }
 
-    const expire = () => {
-      this.expireRecord(record);
-    };
-
-    const requery = () => {
-      this.onRequery(record);
-    };
-
     // If it's unique, flush all records with same name, rrtype, and rrclass.
     if (record.isUnique) {
       for (const [prevRecord] of this.records) {
@@ -304,6 +308,11 @@ class RecordCache {
           record.TYPE === prevRecord.TYPE &&
           record.CLASS === prevRecord.CLASS
         ) {
+          if (recordSort(record, prevRecord) === 0) {
+            // RDATA is the same. Don't flush it.
+            return;
+          }
+
           this.removeRecord(prevRecord);
 
           this.events.push({
@@ -371,7 +380,7 @@ class RecordCache {
       for (const question of questions) {
         if (
           record.TYPE === question.recordType &&
-          record.NAME.join(".") === question.name
+          record.NAME.join(".").toUpperCase() === question.name.toUpperCase()
         ) {
           answersAnyQuestion = true;
         }
