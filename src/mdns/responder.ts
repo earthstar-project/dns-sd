@@ -824,14 +824,14 @@ function hasAnyAnswersForQuestions(
  *
  * This is when the have the same name and type, but different RDATA.
  */
-function isConflicting(a: ResourceRecord, b: ResourceRecord) {
-  const isSameType = a.TYPE === a.TYPE;
+export function isConflicting(a: ResourceRecord, b: ResourceRecord) {
+  const isSameType = a.TYPE === b.TYPE;
 
   if (isSameType === false) {
     return false;
   }
 
-  const isSameName = b.NAME.join(".").toUpperCase() ===
+  const isSameName = a.NAME.join(".").toUpperCase() ===
     b.NAME.join(".").toUpperCase();
 
   if (isSameName === false) {
