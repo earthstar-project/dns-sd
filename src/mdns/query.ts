@@ -7,7 +7,7 @@ import {
 } from "../decode/types.ts";
 import { FastFIFO } from "../fast_fifo.ts";
 import { MulticastInterface } from "./multicast_interface.ts";
-import { recordSort } from "./responder.ts";
+import { isConflicting, recordSort } from "./responder.ts";
 
 const ONE_SECOND_MS = 1000;
 
@@ -38,6 +38,7 @@ export class Query {
   private scheduled: number[] = [];
   private ended = false;
   private suppressedQuestions = new Set<MdnsQuestion>();
+  private additionalRecords = new SimpleRecordStore();
 
   constructor(
     questions: MdnsQuestion[],
@@ -172,6 +173,7 @@ export class Query {
 
   private handleResponse(response: DnsMessage) {
     // Check if any of the records matches our query...
+    let additionalAdded = false;
 
     for (const record of response.answer) {
       const answersAnyQuestion = this.askedQuestionFor(record);
@@ -179,14 +181,18 @@ export class Query {
       if (!answersAnyQuestion) {
         // Not a matching record
         continue;
+      } else if (additionalAdded === false) {
+        // Add all additional records to the cache if there were any answers in this response.
+        for (const additionalRecord of response.additional) {
+          this.additionalRecords.addRecord(additionalRecord);
+        }
+
+        additionalAdded = true;
       }
 
       // It IS a matching record, so add it to our cache.
-
       this.recordCache.addRecord(record);
     }
-
-    console.groupEnd();
   }
 
   /** Sends a DNS query with given questions.
@@ -237,6 +243,16 @@ export class Query {
     await this.minterface.send(message);
   }
 
+  /** All answers obtained over the life of this query. */
+  answers(): ResourceRecord[] {
+    return this.recordCache.getRecords();
+  }
+
+  /** All additional records obtained from responses which had valid answers in them. */
+  additional(): ResourceRecord[] {
+    return this.additionalRecords.getRecords();
+  }
+
   end() {
     this.ended = true;
     this.recordCache.close();
@@ -274,6 +290,10 @@ class RecordCache {
     }
 
     this.events.close();
+  }
+
+  getRecords(): ResourceRecord[] {
+    return Array.from(this.records.keys());
   }
 
   addRecord(record: ResourceRecord) {
@@ -392,6 +412,25 @@ class RecordCache {
     }
 
     return knownAnswers;
+  }
+}
+
+/** A simple record store which replaces conflicting records. */
+class SimpleRecordStore {
+  private records = new Set<ResourceRecord>();
+
+  addRecord(record: ResourceRecord) {
+    for (const existingRecord of this.records) {
+      if (isConflicting(record, existingRecord)) {
+        this.records.delete(existingRecord);
+      }
+    }
+
+    this.records.add(record);
+  }
+
+  getRecords() {
+    return Array.from(this.records);
   }
 }
 
