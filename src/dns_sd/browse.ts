@@ -4,6 +4,7 @@ import {
   isResourceRecordPTR,
   isResourceRecordSRV,
   isResourceRecordTXT,
+  ResourceRecord,
   ResourceRecordA,
   ResourceRecordAAAA,
   ResourceRecordPTR,
@@ -64,8 +65,9 @@ export function browse(opts: BrowseOpts) {
           if (isResourceRecordPTR(event.record)) {
             // iterate over a service thing and relay its events.
 
-            const service = new ServiceThingImBadWithNames(
+            const service = new ServiceResolver(
               event.record,
+              ptrQuery.additional(),
               opts.multicastInterface,
             );
 
@@ -82,7 +84,7 @@ export function browse(opts: BrowseOpts) {
   return fifo;
 }
 
-class ServiceThingImBadWithNames {
+class ServiceResolver {
   private srvRecord: ResourceRecordSRV | null = null;
   private txtRecord: ResourceRecordTXT | null = null;
   private multicastInterface: MulticastInterface;
@@ -93,6 +95,7 @@ class ServiceThingImBadWithNames {
 
   constructor(
     ptrRecord: ResourceRecordPTR,
+    additionalRecords: ResourceRecord[],
     multicastInterface: MulticastInterface,
   ) {
     this.multicastInterface = multicastInterface;
@@ -101,6 +104,47 @@ class ServiceThingImBadWithNames {
 
     this.serviceName = ptrRecord.RDATA.join(".");
 
+    const srvRecord = additionalRecords.find((record) => {
+      return record.NAME.join(".").toUpperCase() ===
+          ptrRecord.RDATA.join(".").toUpperCase() &&
+        record.TYPE === ResourceType.SRV;
+    });
+
+    const txtRecord = additionalRecords.find((record) => {
+      return record.NAME.join(".").toUpperCase() ===
+          ptrRecord.RDATA.join(".").toUpperCase() &&
+        record.TYPE === ResourceType.TXT;
+    });
+
+    const hostNameResourceType = this.multicastInterface.family === "IPv4"
+      ? ResourceType.A
+      : ResourceType.AAAA;
+
+    const aRecord = additionalRecords.find((record) => {
+      return record.NAME.join(".").toUpperCase() ===
+          (srvRecord as ResourceRecordSRV)?.RDATA.target.join(".")
+            .toUpperCase() &&
+        record.TYPE === hostNameResourceType;
+    });
+
+    if (txtRecord) {
+      this.resolveTxt(txtRecord as ResourceRecordTXT);
+    }
+
+    // Ask for srv, txt if we don't have it
+    if (!srvRecord || !txtRecord) {
+      this.resolvePtr();
+    } else if (srvRecord && !aRecord) {
+      this.resolveSrv(srvRecord as ResourceRecordSRV);
+    } else if (srvRecord && aRecord) {
+      this.srvRecord = srvRecord as ResourceRecordSRV;
+      this.hostnameRecord = aRecord as ResourceRecordA | ResourceRecordAAAA;
+
+      this.update();
+    }
+  }
+
+  resolvePtr() {
     const query = new Query(
       [
         {
@@ -112,7 +156,7 @@ class ServiceThingImBadWithNames {
           recordType: ResourceType.TXT,
         },
       ],
-      multicastInterface,
+      this.multicastInterface,
     );
 
     (async () => {
@@ -120,9 +164,9 @@ class ServiceThingImBadWithNames {
         switch (event.kind) {
           case "ADDED": {
             if (isResourceRecordTXT(event.record)) {
-              this.setTxt(event.record);
+              this.resolveTxt(event.record);
             } else if (isResourceRecordSRV(event.record)) {
-              await this.setSrv(event.record);
+              await this.resolveSrv(event.record);
             }
             break;
           }
@@ -132,13 +176,14 @@ class ServiceThingImBadWithNames {
     })();
   }
 
-  setTxt(record: ResourceRecordTXT) {
+  resolveTxt(record: ResourceRecordTXT) {
     this.txtRecord = record;
 
     // see if we can resolve a pending promise to be yielded.
+    this.update();
   }
 
-  async setSrv(record: ResourceRecordSRV) {
+  async resolveSrv(record: ResourceRecordSRV) {
     // make a new query for A / AAAA record for this (use multicast interface family to determine which to ask for)
     const recordTypeToRequest = this.multicastInterface.family === "IPv4"
       ? ResourceType.A
