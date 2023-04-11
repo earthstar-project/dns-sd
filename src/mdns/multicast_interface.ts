@@ -17,6 +17,8 @@ export interface MulticastDriver {
 
   setLoopback(loopback: boolean): Promise<void>;
 
+  isOwnAddress(address: string): boolean;
+
   close(): void;
 }
 
@@ -43,7 +45,10 @@ export class MulticastInterface {
           try {
             controller.enqueue([decodeMessage(received), origin]);
           } catch (err) {
-            console.warn("Could not decode a DNS message from", origin);
+            console.warn(
+              `Could not decode a DNS message from ${origin.hostname}:${origin.port}`,
+            );
+            console.log(err);
           }
         }
       },
@@ -84,6 +89,10 @@ export class MulticastInterface {
     this.subscribers.push(subscriber);
 
     return subscriber;
+  }
+
+  isOwnAddress(address: string): boolean {
+    return this.driver.isOwnAddress(address);
   }
 
   get address() {

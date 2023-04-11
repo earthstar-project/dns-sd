@@ -12,10 +12,12 @@ export class TestMulticastDriver implements MulticastDriver {
   ) => void;
 
   constructor(
+    address: string,
     onDriverSent: (
       msg: DnsMessage,
     ) => void,
   ) {
+    this.address = address;
     this.driverSent = onDriverSent;
   }
 
@@ -24,7 +26,7 @@ export class TestMulticastDriver implements MulticastDriver {
     [Uint8Array, { hostname: string; port: number }]
   >(16);
 
-  address = "0.0.0.0";
+  address: string;
   family = "IPv4" as const;
 
   // Driver methods
@@ -66,6 +68,10 @@ export class TestMulticastDriver implements MulticastDriver {
 
   close() {
     this.messages.close();
+  }
+
+  isOwnAddress(address: string): boolean {
+    return address === this.address;
   }
 
   // Special test methods

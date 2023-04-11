@@ -18,7 +18,7 @@ Deno.test("Sends the appropriate questions", async () => {
   const messages: DnsMessage[] = [];
 
   const minterface = new MulticastInterface(
-    new TestMulticastDriver((message) => {
+    new TestMulticastDriver("0.0.0.0", (message) => {
       messages.push(message);
     }),
   );
@@ -66,7 +66,7 @@ Deno.test("Delays the first query by 20ms - 120ms", async () => {
   const messages: DnsMessage[] = [];
 
   const minterface = new MulticastInterface(
-    new TestMulticastDriver((message) => {
+    new TestMulticastDriver("0.0.0.0", (message) => {
       messages.push(message);
     }),
   );
@@ -97,7 +97,7 @@ Deno.test({
     const messages: DnsMessage[] = [];
 
     const minterface = new MulticastInterface(
-      new TestMulticastDriver((message) => {
+      new TestMulticastDriver("0.0.0.0", (message) => {
         messages.push(message);
       }),
     );
@@ -128,7 +128,7 @@ Deno.test({
   fn: async () => {
     const messages: DnsMessage[] = [];
 
-    const testDriver = new TestMulticastDriver((message) => {
+    const testDriver = new TestMulticastDriver("0.0.0.0", (message) => {
       messages.push(message);
     });
 
@@ -190,7 +190,7 @@ Deno.test({
   name:
     "Valid answers are added to the cache upon reception, and are removed when they expire.",
   fn: async () => {
-    const testDriver = new TestMulticastDriver(() => {});
+    const testDriver = new TestMulticastDriver("0.0.0.0", () => {});
 
     const minterface = new MulticastInterface(testDriver);
 
@@ -271,7 +271,7 @@ Deno.test({
   name: "As an answer approaches expiry it is requeried",
   fn: async () => {
     const messages: DnsMessage[] = [];
-    const testDriver = new TestMulticastDriver((message) => {
+    const testDriver = new TestMulticastDriver("0.0.0.0", (message) => {
       messages.push(message);
     });
 
@@ -342,7 +342,7 @@ Deno.test({
   name: "Adds non-unique records without replacing them",
   fn: async () => {
     const messages: DnsMessage[] = [];
-    const testDriver = new TestMulticastDriver((message) => {
+    const testDriver = new TestMulticastDriver("0.0.0.0", (message) => {
       messages.push(message);
     });
 
@@ -446,7 +446,7 @@ Deno.test({
 
   fn: async () => {
     const messages: DnsMessage[] = [];
-    const testDriver = new TestMulticastDriver((message) => {
+    const testDriver = new TestMulticastDriver("0.0.0.0", (message) => {
       messages.push(message);
     });
 
@@ -555,7 +555,7 @@ Deno.test({
   fn: async () => {
     const messages: DnsMessage[] = [];
 
-    const testDriver = new TestMulticastDriver((message) => {
+    const testDriver = new TestMulticastDriver("0.0.0.0", (message) => {
       messages.push(message);
     });
 
@@ -621,7 +621,7 @@ Deno.test({
   fn: async () => {
     const messages: DnsMessage[] = [];
 
-    const testDriver = new TestMulticastDriver((message) => {
+    const testDriver = new TestMulticastDriver("0.0.0.0", (message) => {
       messages.push(message);
     });
 
@@ -687,7 +687,7 @@ Deno.test({
   fn: async () => {
     const messages: DnsMessage[] = [];
 
-    const testDriver = new TestMulticastDriver((message) => {
+    const testDriver = new TestMulticastDriver("0.0.0.0", (message) => {
       messages.push(message);
     });
 
@@ -754,7 +754,7 @@ Deno.test({
   fn: async () => {
     const messages: DnsMessage[] = [];
 
-    const testDriver = new TestMulticastDriver((message) => {
+    const testDriver = new TestMulticastDriver("0.0.0.0", (message) => {
       messages.push(message);
     });
 

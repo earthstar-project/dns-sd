@@ -180,6 +180,7 @@ export function decodeResourceRecord(
 
   const resourceType = dataView.getUint16(nextPosition);
   const resourceClass = dataView.getUint16(nextPosition + 2);
+
   const resourceTTL = dataView.getUint32(nextPosition + 4);
   const rdataLength = dataView.getUint16(nextPosition + 8);
 

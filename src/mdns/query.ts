@@ -191,6 +191,7 @@ export class Query {
       }
 
       // It IS a matching record, so add it to our cache.
+
       this.recordCache.addRecord(record);
     }
   }
@@ -392,7 +393,7 @@ class RecordCache {
 
   /** Return all records in the cache matching a set of questions. Used for known-answer suppression.*/
   knownAnswers(questions: MdnsQuestion[]) {
-    const knownAnswers: ResourceRecord[] = [];
+    const knownAnswers = new Set<ResourceRecord>();
 
     for (const [record] of this.records) {
       let answersAnyQuestion = false;
@@ -407,11 +408,11 @@ class RecordCache {
       }
 
       if (answersAnyQuestion) {
-        knownAnswers.push(record);
+        knownAnswers.add(record);
       }
     }
 
-    return knownAnswers;
+    return Array.from(knownAnswers);
   }
 }
 

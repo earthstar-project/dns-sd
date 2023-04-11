@@ -21,9 +21,10 @@ type BrowseOpts = {
     /** Something like 'http' */
     type: string;
     protocol: "tcp" | "udp";
-    subtypes: [];
+    subtypes?: string[];
   };
   multicastInterface: MulticastInterface;
+  signal?: AbortSignal;
 };
 
 type Service = {
@@ -39,7 +40,7 @@ type Service = {
 
 export function browse(opts: BrowseOpts) {
   const subName = `${
-    opts.service.subtypes.length > 0
+    opts.service.subtypes && opts.service.subtypes.length > 0
       ? `.${opts.service.subtypes.map((sub) => `_${sub}`).join(".")}._sub.`
       : ""
   }`;
@@ -58,12 +59,20 @@ export function browse(opts: BrowseOpts) {
 
   const fifo = new FastFIFO<Service>(16);
 
+  const services = new Map<string, ServiceResolver>();
+
   (async () => {
     for await (const event of ptrQuery) {
       switch (event.kind) {
         case "ADDED":
+          // We need to add only one
           if (isResourceRecordPTR(event.record)) {
             // iterate over a service thing and relay its events.
+            const key = event.record.RDATA.join(".");
+
+            if (services.has(key)) {
+              continue;
+            }
 
             const service = new ServiceResolver(
               event.record,
@@ -76,7 +85,10 @@ export function browse(opts: BrowseOpts) {
                 fifo.push(event);
               }
             })();
+
+            services.set(key, service);
           }
+          break;
       }
     }
   })();
@@ -151,6 +163,7 @@ class ServiceResolver {
           name: this.serviceName,
           recordType: ResourceType.SRV,
         },
+
         {
           name: this.serviceName,
           recordType: ResourceType.TXT,
@@ -166,9 +179,8 @@ class ServiceResolver {
             if (isResourceRecordTXT(event.record)) {
               this.resolveTxt(event.record);
             } else if (isResourceRecordSRV(event.record)) {
-              await this.resolveSrv(event.record);
+              this.resolveSrv(event.record);
             }
-            break;
           }
         }
         // TODO: flushed, expired.

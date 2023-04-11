@@ -70,6 +70,16 @@ export class MulticastDriverDeno implements MulticastDriver {
     return [msg, addr as Deno.NetAddr];
   }
 
+  isOwnAddress(address: string): boolean {
+    for (const networkInterface of Deno.networkInterfaces()) {
+      if (address === networkInterface.address) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   close(): void {
     this.conn.close();
   }

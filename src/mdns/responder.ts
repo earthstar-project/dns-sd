@@ -22,9 +22,14 @@ import {
 } from "../decode/types.ts";
 import { MulticastInterface } from "./multicast_interface.ts";
 
-type RespondOpts = {
+export type RespondingRecord = ResourceRecord & {
+  /** Records which should be included in the additional section of the DNS message when this record is used in a response. */
+  additional?: ResourceRecord[];
+};
+
+export type RespondOpts = {
   /** The DNS records a responder wants to be authoritative for */
-  proposedRecords: ResourceRecord[];
+  proposedRecords: RespondingRecord[];
   minterface: MulticastInterface;
   signal?: AbortSignal;
 };
@@ -44,10 +49,8 @@ export async function respond(opts: RespondOpts) {
 
   const probeResponse = await probe(opts);
 
-  if (probeResponse === "conflict") {
-    return Promise.reject(
-      "Proposed record(s) conflicted with others on the network.",
-    );
+  if (probeResponse !== "success") {
+    return Promise.reject(probeResponse);
   }
 
   const sender = new AggregatingScheduledSend(opts.minterface);
@@ -104,7 +107,7 @@ export async function respond(opts: RespondOpts) {
       }
 
       // Ignore messages from ourselves
-      if (host.hostname === opts.minterface.address) {
+      if (opts.minterface.isOwnAddress(host.hostname)) {
         continue;
       }
 
@@ -127,7 +130,10 @@ export async function respond(opts: RespondOpts) {
           // If we can answer all questions.
           // and all answers are unique...
           if (
-            canAnswerAllQuestions(message.question, opts.proposedRecords) &&
+            canAnswerAllQuestions(
+              message.question,
+              opts.proposedRecords,
+            ) &&
             allAnswersAreUnique(answersWithTTL)
           ) {
             // Send immediately
@@ -159,11 +165,12 @@ export async function respond(opts: RespondOpts) {
             } else if (isConflicting(answer, ourRecord)) {
               // Someone else is sending out records that conflict with ours!
               // We need to start over.
-              if (isConflicting(answer, ourRecord)) {
-                respondPromise.reject(
-                  "Conflicting record was received from another host.",
-                );
-              }
+
+              respondPromise.reject(
+                "Conflicting record was received from another host.",
+              );
+
+              aborted = true;
             }
           }
         }
@@ -187,7 +194,7 @@ function answersFor(
   /** The family of IP addresses used by us. */
   family: "IPv4" | "IPv6",
 ) {
-  const validAnswers = new Set<ResourceRecord>();
+  const validAnswers = new Set<RespondingRecord>();
   /** A map of names to resource types we actually hold. */
   const heldTypesForNsec = new Map<string, Set<ResourceType>>();
 
@@ -263,8 +270,8 @@ function answersFor(
 }
 
 /** Normalise TTLs of specific types of resource records  */
-function alterTTLs(records: ResourceRecord[]) {
-  const alteredRecords: ResourceRecord[] = [];
+function alterTTLs(records: RespondingRecord[]) {
+  const alteredRecords: RespondingRecord[] = [];
 
   const ttl120Types = [
     ResourceType.A,
@@ -299,7 +306,8 @@ function alterTTLs(records: ResourceRecord[]) {
  */
 class AggregatingScheduledSend {
   private minterface: MulticastInterface;
-  private queuedAnswers = new Set<ResourceRecord>();
+  private queuedAnswers = new Set<RespondingRecord>();
+
   private answersSentInLastSecond = new Set<ResourceRecord>();
   /** The timer for the next scheduled send. Null indicates no scheduled send.*/
   private scheduledSend: null | number = null;
@@ -321,8 +329,8 @@ class AggregatingScheduledSend {
   }
 
   /** Dispatch some answers immediately, used when sending out stuff like A records. */
-  dispatchImmediately(answers: ResourceRecord[]) {
-    const answersToSend = new Set<ResourceRecord>();
+  dispatchImmediately(answers: RespondingRecord[]) {
+    const answersToSend = new Set<RespondingRecord>();
 
     for (const record of answers) {
       if (this.answersSentInLastSecond.has(record)) {
@@ -334,6 +342,18 @@ class AggregatingScheduledSend {
 
     if (answersToSend.size === 0) {
       return;
+    }
+
+    const allAdditionals = new Set<ResourceRecord>();
+
+    for (const record of answersToSend) {
+      if (!record.additional) {
+        continue;
+      }
+
+      for (const additional of record.additional) {
+        allAdditionals.add(additional);
+      }
     }
 
     const response: DnsMessage = {
@@ -352,7 +372,7 @@ class AggregatingScheduledSend {
         QDCOUNT: 0,
         ANCOUNT: answersToSend.size,
         NSCOUNT: 0,
-        ARCOUNT: 0,
+        ARCOUNT: allAdditionals.size,
       },
       question: [],
       answer: Array.from(answersToSend).map((record) => {
@@ -362,7 +382,7 @@ class AggregatingScheduledSend {
         };
       }),
       authority: [],
-      additional: [],
+      additional: Array.from(allAdditionals),
     };
 
     this.minterface.send(response);
@@ -384,6 +404,18 @@ class AggregatingScheduledSend {
   }
 
   private dispatchMessage() {
+    const allAdditionals = new Set<ResourceRecord>();
+
+    for (const record of this.queuedAnswers) {
+      if (!record.additional) {
+        continue;
+      }
+
+      for (const additional of record.additional) {
+        allAdditionals.add(additional);
+      }
+    }
+
     const response: DnsMessage = {
       header: {
         ID: 0,
@@ -400,7 +432,7 @@ class AggregatingScheduledSend {
         QDCOUNT: 0,
         ANCOUNT: this.queuedAnswers.size,
         NSCOUNT: 0,
-        ARCOUNT: 0,
+        ARCOUNT: allAdditionals.size,
       },
       question: [],
       answer: Array.from(this.queuedAnswers).map((record) => {
@@ -410,7 +442,7 @@ class AggregatingScheduledSend {
         };
       }),
       authority: [],
-      additional: [],
+      additional: Array.from(allAdditionals),
     };
 
     this.onSentAnswers(Array.from(this.queuedAnswers));
@@ -426,7 +458,7 @@ class AggregatingScheduledSend {
    *
    * Does not queue an answer if it was sent in the last second
    */
-  addAnswers(records: ResourceRecord[]) {
+  addAnswers(records: RespondingRecord[]) {
     for (const record of records) {
       if (this.answersSentInLastSecond.has(record)) {
         continue;
@@ -463,7 +495,7 @@ type ProbeOpts = {
   signal?: AbortSignal;
 };
 
-type ProbeResult = "success" | "conflict";
+type ProbeResult = "name_taken" | "simultaneous_probe" | "success";
 
 /** Probes the network for another peer who might have already claimed authority for certain records.
  *
@@ -504,7 +536,7 @@ function probe(opts: ProbeOpts): Promise<ProbeResult> {
         continue;
       }
 
-      if (host.hostname === opts.minterface.address) {
+      if (opts.minterface.isOwnAddress(host.hostname)) {
         continue;
       }
 
@@ -512,35 +544,44 @@ function probe(opts: ProbeOpts): Promise<ProbeResult> {
         // It's a response.
 
         // If someone replies with our desired names.
-        if (hasAnyAnswersForQuestions(questions, message.answer)) {
+        if (hasAnyUniqueAnswersForQuestions(questions, message.answer)) {
           // stop the interval
           clearProbeTimers();
           // choose a new name
 
-          promise.resolve("conflict");
+          promise.resolve("name_taken");
+          break;
         }
       } else {
         // It's a query
 
-        // If someone is also probing for the same name
-        if (hasAnyAnswersForQuestions(message.question, opts.proposedRecords)) {
+        // If someone is also probing for the same name...
+        if (
+          message.authority.length > 0 &&
+          isProbingForRecords(message.question, opts.proposedRecords)
+        ) {
           // stop the interval.
-          clearProbeTimers();
+
           // tiebreak!
-          const order = sortManyRecords(
+          const { ourTieBreakers, theirTieBreakers } = getTieBreakerQuestions(
             opts.proposedRecords,
             message.authority,
           );
 
-          if (order === -1) {
-            // if we lose, name taken.
-            // Probe again in one second.
+          const order = sortManyRecords(
+            ourTieBreakers,
+            theirTieBreakers,
+          );
 
-            promise.resolve("conflict");
-          } else {
-            // if we win, success
-            promise.resolve("success");
+          if (order === -1) {
+            // if we lose, probe with the same name again in one second.
+
+            promise.resolve("simultaneous_probe");
+            clearProbeTimers();
+            break;
           }
+
+          // Continue to probe...
         }
       }
     }
@@ -608,6 +649,18 @@ function probe(opts: ProbeOpts): Promise<ProbeResult> {
  * Returns a promise which resolves after two announcements have been broadcast.
  */
 async function announce(opts: RespondOpts) {
+  const additionalRecords = new Set<ResourceRecord>();
+
+  for (const record of opts.proposedRecords) {
+    if (!record.additional) {
+      continue;
+    }
+
+    for (const additionalRecord of record.additional) {
+      additionalRecords.add(additionalRecord);
+    }
+  }
+
   const announceMessage: DnsMessage = {
     header: {
       ID: 0,
@@ -624,7 +677,7 @@ async function announce(opts: RespondOpts) {
       QDCOUNT: 0,
       ANCOUNT: opts.proposedRecords.length,
       NSCOUNT: 0,
-      ARCOUNT: 0,
+      ARCOUNT: additionalRecords.size,
     },
     question: [],
     answer: opts.proposedRecords.map((record) => {
@@ -634,7 +687,7 @@ async function announce(opts: RespondOpts) {
       };
     }),
     authority: [],
-    additional: [],
+    additional: Array.from(additionalRecords),
   };
 
   // Two announcements, one second apart.
@@ -820,11 +873,100 @@ function hasAnyAnswersForQuestions(
   return false;
 }
 
+/** Checks if *any* of the given unique answers answer any of the given questions. */
+function hasAnyUniqueAnswersForQuestions(
+  questions: DnsQuestionSection[],
+  answers: ResourceRecord[],
+): boolean {
+  for (const question of questions) {
+    for (const record of answers) {
+      const isRightType = record.TYPE === question.QTYPE ||
+        question.QTYPE === ResourceType.ANY;
+      const isRightName = record.NAME.join(".").toUpperCase() ===
+        question.QNAME.join(".").toUpperCase();
+
+      if (isRightType && isRightName && record.isUnique) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+function isProbingForRecords(
+  questions: DnsQuestionSection[],
+  records: ResourceRecord[],
+): boolean {
+  for (const record of records) {
+    if (record.isUnique === false) {
+      continue;
+    }
+
+    for (const question of questions) {
+      const isRightType = record.TYPE === question.QTYPE ||
+        question.QTYPE === ResourceType.ANY;
+      const isRightName = record.NAME.join(".").toUpperCase() ===
+        question.QNAME.join(".").toUpperCase();
+
+      if (isRightType && isRightName) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+function getTieBreakerQuestions(
+  ourRecords: ResourceRecord[],
+  theirRecords: ResourceRecord[],
+): {
+  ourTieBreakers: ResourceRecord[];
+  theirTieBreakers: ResourceRecord[];
+} {
+  // compare their records with ours
+
+  // our tiebreakers should be ones that conflict with theirs
+  // theirs should be ones that conflict with ours.
+
+  // each record should appear only once...
+
+  const ourTieBreakers = new Set<ResourceRecord>();
+  const theirTieBreakers = new Set<ResourceRecord>();
+
+  for (const ourRecord of ourRecords) {
+    for (const theirRecord of theirRecords) {
+      if (ourRecord.isUnique === false || theirRecord.isUnique === false) {
+        continue;
+      }
+
+      const isSameType = ourRecord.TYPE === theirRecord.TYPE;
+      const isSameName = ourRecord.NAME.join(".").toUpperCase() ===
+        theirRecord.NAME.join(".").toUpperCase();
+
+      if (isSameType && isSameName) {
+        ourTieBreakers.add(ourRecord);
+        theirTieBreakers.add(theirRecord);
+      }
+    }
+  }
+
+  return {
+    ourTieBreakers: Array.from(ourTieBreakers),
+    theirTieBreakers: Array.from(theirTieBreakers),
+  };
+}
+
 /** Checks if two records conflict with each other.
  *
  * This is when the have the same name and type, but different RDATA.
  */
 export function isConflicting(a: ResourceRecord, b: ResourceRecord) {
+  if (a.isUnique === false || b.isUnique === false) {
+    return false;
+  }
+
   const isSameType = a.TYPE === b.TYPE;
 
   if (isSameType === false) {
