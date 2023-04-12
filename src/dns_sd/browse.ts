@@ -16,9 +16,8 @@ import { FastFIFO } from "../fast_fifo.ts";
 import { MulticastInterface } from "../mdns/multicast_interface.ts";
 import { MdnsQuestion, Query } from "../mdns/query.ts";
 
-type BrowseOpts = {
+export type BrowseOpts = {
   service: {
-    /** Something like 'http' */
     type: string;
     protocol: "tcp" | "udp";
     subtypes?: string[];
@@ -27,7 +26,7 @@ type BrowseOpts = {
   signal?: AbortSignal;
 };
 
-type Service = {
+export type Service = {
   name: string;
   type: string;
   subtypes: string[];
@@ -41,7 +40,7 @@ type Service = {
 export function browse(opts: BrowseOpts) {
   const subName = `${
     opts.service.subtypes && opts.service.subtypes.length > 0
-      ? `.${opts.service.subtypes.map((sub) => `_${sub}`).join(".")}._sub.`
+      ? `${opts.service.subtypes.map((sub) => `_${sub}`).join(".")}._sub.`
       : ""
   }`;
 
@@ -56,6 +55,12 @@ export function browse(opts: BrowseOpts) {
   ];
 
   const ptrQuery = new Query(questions, opts.multicastInterface);
+
+  if (opts.signal) {
+    opts.signal.addEventListener("abort", () => {
+      ptrQuery.end();
+    });
+  }
 
   const fifo = new FastFIFO<Service>(16);
 
@@ -88,7 +93,6 @@ export function browse(opts: BrowseOpts) {
 
             services.set(key, service);
           }
-          break;
       }
     }
   })();
@@ -304,8 +308,8 @@ function parseServiceName(name: string): {
     // Then there are sub types.
     const subTypesLength = parts.length - 4 - 1;
 
-    for (let i = 1; i < subTypesLength; i++) {
-      subTypes.push(parts[i].replace("_", ""));
+    for (let i = 0; i < subTypesLength; i++) {
+      subTypes.push(parts[i + 1].replace("_", ""));
     }
   }
 
