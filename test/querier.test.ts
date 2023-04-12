@@ -175,7 +175,7 @@ Deno.test({
       answer: [ptrAnswer],
       authority: [],
       additional: [],
-    }, { hostname: "5.5.5.5", port: 5353 });
+    }, "5.5.5.5");
 
     await delay(1000);
 
@@ -243,7 +243,7 @@ Deno.test({
       answer: [ptrAnswer],
       authority: [],
       additional: [],
-    }, { hostname: "5.5.5.5", port: 5353 });
+    }, "5.5.5.5");
 
     await delay(1);
 
@@ -318,7 +318,7 @@ Deno.test({
       answer: [ptrAnswer],
       authority: [],
       additional: [],
-    }, { hostname: "5.5.5.5", port: 5353 });
+    }, "5.5.5.5");
 
     await delay(1);
 
@@ -389,7 +389,7 @@ Deno.test({
       answer: [ptrAnswer1],
       authority: [],
       additional: [],
-    }, { hostname: "5.5.5.5", port: 5353 });
+    }, "5.5.5.5");
 
     const ptrAnswer1Updated: ResourceRecordPTR = {
       CLASS: DnsClass.IN,
@@ -433,7 +433,7 @@ Deno.test({
       answer: [ptrAnswer1Updated, ptrAnswer2],
       authority: [],
       additional: [],
-    }, { hostname: "5.5.5.5", port: 5353 });
+    }, "5.5.5.5");
 
     await delay(1);
 
@@ -501,7 +501,7 @@ Deno.test({
       answer: [aAnswer1],
       authority: [],
       additional: [],
-    }, { hostname: "5.5.5.5", port: 5353 });
+    }, "5.5.5.5");
 
     const aAnswer2: ResourceRecordA = {
       CLASS: DnsClass.IN,
@@ -535,7 +535,7 @@ Deno.test({
       answer: [aAnswer2],
       authority: [],
       additional: [],
-    }, { hostname: "5.5.5.5", port: 5353 });
+    }, "5.5.5.5");
 
     await delay(1);
 
@@ -604,7 +604,7 @@ Deno.test({
       }],
       authority: [],
       additional: [],
-    }, { hostname: "5.5.5.5", port: 5353 });
+    }, "5.5.5.5");
 
     assertEquals(messages[0].question.length, 2);
 
@@ -664,7 +664,7 @@ Deno.test({
       answer: [],
       authority: [],
       additional: [],
-    }, { hostname: "5.5.5.5", port: 5353 });
+    }, "5.5.5.5");
 
     await delay(1000);
 
@@ -732,7 +732,7 @@ Deno.test({
       }],
       authority: [],
       additional: [],
-    }, { hostname: "5.5.5.5", port: 5353 });
+    }, "5.5.5.5");
 
     assertEquals(messages[0].question.length, 1);
 
@@ -807,7 +807,7 @@ Deno.test({
         authority: [],
         additional: [],
       },
-      { hostname: "5.5.5.5", port: 5353 },
+      "5.5.5.5",
     );
 
     await delay(1);
@@ -846,7 +846,7 @@ Deno.test({
         authority: [],
         additional: [],
       },
-      { hostname: "5.5.5.5", port: 5353 },
+      "5.5.5.5",
     );
 
     await delay(1);

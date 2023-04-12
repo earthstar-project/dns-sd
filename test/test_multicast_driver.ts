@@ -43,7 +43,7 @@ export class TestMulticastDriver implements MulticastDriver {
   send(message: Uint8Array): Promise<void> {
     if (this.isLooping) {
       this.messages.push([message, {
-        hostname: "0.0.0.0",
+        hostname: this.address,
         port: 5353,
       }]);
     }
@@ -78,9 +78,12 @@ export class TestMulticastDriver implements MulticastDriver {
 
   sendInboundMessage(
     msg: DnsMessage,
-    host: { hostname: string; port: number },
+    hostname: string,
   ) {
     const encoded = encodeMessage(msg);
-    this.messages.push([encoded, host]);
+    this.messages.push([encoded, {
+      hostname: hostname,
+      port: 5353,
+    }]);
   }
 }

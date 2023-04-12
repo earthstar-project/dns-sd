@@ -263,10 +263,7 @@ Deno.test({
       answer: [conflictingRecord],
       authority: [],
       additional: [],
-    }, {
-      hostname: "8.8.8.8",
-      port: 5353,
-    });
+    }, "8.8.8.8");
 
     await delay(1);
 
@@ -282,17 +279,11 @@ Deno.test({
   fn: async () => {
     // Set up two announcements
     const testDriverWinner = new TestMulticastDriver("0.0.0.0", (msg) => {
-      testDriverLoser.sendInboundMessage(msg, {
-        hostname: "0.0.0.0",
-        port: 5343,
-      });
+      testDriverLoser.sendInboundMessage(msg, "0.0.0.0");
     });
 
     const testDriverLoser = new TestMulticastDriver("1.1.1.1", (msg) => {
-      testDriverWinner.sendInboundMessage(msg, {
-        hostname: "1.1.1.1",
-        port: 5343,
-      });
+      testDriverWinner.sendInboundMessage(msg, "1.1.1.1");
     });
 
     const minterfaceWinner = new MulticastInterface(testDriverWinner);
@@ -420,17 +411,11 @@ Deno.test({
   fn: async () => {
     // Set up two announcements
     const testDriverA = new TestMulticastDriver("0.0.0.0", (msg) => {
-      testDriverB.sendInboundMessage(msg, {
-        hostname: "7.7.7.7",
-        port: 5343,
-      });
+      testDriverB.sendInboundMessage(msg, "7.7.7.7");
     });
 
     const testDriverB = new TestMulticastDriver("1.1.1.1", (msg) => {
-      testDriverA.sendInboundMessage(msg, {
-        hostname: "0.0.0.0",
-        port: 5343,
-      });
+      testDriverA.sendInboundMessage(msg, "7.7.7.7");
     });
 
     const minterfaceA = new MulticastInterface(testDriverA);
@@ -597,10 +582,7 @@ Deno.test({
       answer: [conflictingRecord],
       authority: [],
       additional: [],
-    }, {
-      hostname: "8.8.8.8",
-      port: 5353,
-    });
+    }, "8.8.8.8");
 
     await delay(10);
 
@@ -677,10 +659,7 @@ Deno.test({
       answer: [],
       authority: [],
       additional: [],
-    }, {
-      hostname: "9.9.9.9",
-      port: 5353,
-    });
+    }, "9.9.9.9");
 
     await delay(1);
 
@@ -765,10 +744,7 @@ Deno.test({
       answer: [],
       authority: [proposedARecord],
       additional: [],
-    }, {
-      hostname: "9.9.9.9",
-      port: 5353,
-    });
+    }, "9.9.9.9");
 
     await delay(1);
 
@@ -853,10 +829,7 @@ Deno.test({
       answer: [],
       authority: [],
       additional: [],
-    }, {
-      hostname: "9.9.9.9",
-      port: 5353,
-    });
+    }, "9.9.9.9");
 
     await delay(1);
 
@@ -935,10 +908,7 @@ Deno.test({
       answer: [],
       authority: [],
       additional: [],
-    }, {
-      hostname: "9.9.9.9",
-      port: 5353,
-    });
+    }, "9.9.9.9");
 
     await delay(1);
 
@@ -1023,10 +993,7 @@ Deno.test({
       answer: [],
       authority: [],
       additional: [],
-    }, {
-      hostname: "9.9.9.9",
-      port: 5353,
-    });
+    }, "9.9.9.9");
 
     await delay(1);
 
@@ -1105,10 +1072,7 @@ Deno.test({
       answer: [],
       authority: [],
       additional: [],
-    }, {
-      hostname: "9.9.9.9",
-      port: 5353,
-    });
+    }, "9.9.9.9");
 
     await delay(1);
 
@@ -1194,10 +1158,7 @@ Deno.test({
       answer: [],
       authority: [],
       additional: [],
-    }, {
-      hostname: "9.9.9.9",
-      port: 5353,
-    });
+    }, "9.9.9.9");
 
     await delay(1);
 
@@ -1274,10 +1235,7 @@ Deno.test({
       answer: [proposedRecord],
       authority: [],
       additional: [],
-    }, {
-      hostname: "9.9.9.9",
-      port: 5353,
-    });
+    }, "9.9.9.9");
 
     await delay(1);
 
@@ -1403,10 +1361,7 @@ Deno.test({
       answer: [],
       authority: [],
       additional: [],
-    }, {
-      hostname: "9.9.9.9",
-      port: 5353,
-    });
+    }, "9.9.9.9");
 
     await delay(10);
 
@@ -1440,10 +1395,7 @@ Deno.test({
       answer: [],
       authority: [],
       additional: [],
-    }, {
-      hostname: "9.9.9.9",
-      port: 5353,
-    });
+    }, "9.9.9.9");
 
     await delay(120);
 
