@@ -91,7 +91,7 @@ export async function respond(opts: RespondOpts) {
       });
 
       sender.stop();
-      respondPromise.reject("Responder aborted");
+      respondPromise.reject("aborted");
       aborted = true;
     });
   }
