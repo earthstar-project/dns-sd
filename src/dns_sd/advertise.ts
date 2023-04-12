@@ -1,15 +1,3 @@
-/*
-just a long running promise, like responder...
-can rename something when probing fails.
-keeps tracks of all the failures too.
-
-add additional records to proposed records...
-
-just advertise what is configured?
-
-put in host name and port manually, no deno interface stuff.
-*/
-
 import { delay } from "https://deno.land/std@0.177.0/async/delay.ts";
 import {
   DnsClass,
@@ -41,14 +29,24 @@ export async function advertise(opts: AdvertiseOpts) {
   let attemptsInLastTenSeconds = 0;
   const removalTimers: number[] = [];
 
-  let renameAttempts = 0;
+  let renameAttempts = 1;
 
-  while (attemptsInLastTenSeconds < 15) {
-    const name = renameAttempts
+  if (opts.signal) {
+    opts.signal.addEventListener("abort", () => {
+      attemptsInLastTenSeconds = 16;
+
+      for (const timer of removalTimers) {
+        clearTimeout(timer);
+      }
+    });
+  }
+
+  while (attemptsInLastTenSeconds <= 15) {
+    const name = renameAttempts > 1
       ? `${opts.service.name} (${renameAttempts})`
       : opts.service.name;
 
-    if (renameAttempts > 0) {
+    if (renameAttempts > 1) {
       console.warn(`Renamed to "${name}"`);
     }
 
@@ -140,13 +138,15 @@ export async function advertise(opts: AdvertiseOpts) {
       if (failure === "simultaneous_probe") {
         await delay(1000);
         return;
-      } else {
+      } else if (failure === "name_taken") {
         attemptsInLastTenSeconds += 1;
         const removalTimer = setTimeout(() => {
           attemptsInLastTenSeconds -= 1;
         }, 10000);
         removalTimers.push(removalTimer);
         renameAttempts += 1;
+      } else if (failure === "aborted") {
+        return Promise.reject("Advertisement was aborted.");
       }
     });
   }
@@ -157,7 +157,7 @@ export async function advertise(opts: AdvertiseOpts) {
 
   return Promise.reject(
     new Error(
-      "Was not able to claim a name after 15 attempts. There is probably something going wrong.",
+      "Was not able to claim a name after 15 attempts, which indicates shenanigans.",
     ),
   );
 }
