@@ -1,7 +1,7 @@
 import { MDNS_IPV4, MDNS_IPV6, MDNS_PORT } from "./constants.ts";
 import { MulticastDriver } from "./multicast_interface.ts";
 
-export class MulticastDriverDeno implements MulticastDriver {
+export class DefaultDriver implements MulticastDriver {
   private conn: Deno.DatagramConn;
   private membership:
     | ReturnType<Deno.DatagramConn["joinMulticastV4"]>

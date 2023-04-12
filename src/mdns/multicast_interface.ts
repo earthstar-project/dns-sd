@@ -2,6 +2,7 @@ import { decodeMessage } from "../decode/message_decode.ts";
 import { encodeMessage } from "../decode/message_encode.ts";
 import { DnsMessage } from "../decode/types.ts";
 import { FastFIFO } from "../fast_fifo.ts";
+import { DefaultDriver } from "./default_driver.ts";
 
 /** A driver which supplies the underlying methods a `MulticastInterface` uses to send and receive multicast messages. */
 export interface MulticastDriver {
@@ -31,8 +32,10 @@ export class MulticastInterface {
     [DnsMessage, { hostname: string; port: number }]
   >[] = [];
 
-  constructor(driver: MulticastDriver) {
-    this.driver = driver;
+  constructor(driver?: MulticastDriver) {
+    const driverToUse = driver || new DefaultDriver("IPv4");
+
+    this.driver = driverToUse;
     const subscribers = this.subscribers;
 
     const readable = new ReadableStream<
@@ -40,7 +43,7 @@ export class MulticastInterface {
     >({
       async start(controller) {
         while (true) {
-          const [received, origin] = await driver.receive();
+          const [received, origin] = await driverToUse.receive();
 
           try {
             controller.enqueue([decodeMessage(received), origin]);
