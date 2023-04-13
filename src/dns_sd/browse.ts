@@ -17,6 +17,7 @@ import { MulticastInterface } from "../mdns/multicast_interface.ts";
 import { MdnsQuestion, Query } from "../mdns/query.ts";
 
 export type BrowseOpts = {
+  /** The kind of service you wish to browse. */
   service: {
     type: string;
     protocol: "tcp" | "udp";
@@ -26,6 +27,7 @@ export type BrowseOpts = {
   signal?: AbortSignal;
 };
 
+/** A service discovered via multicast DNS-SD. */
 export type Service = {
   name: string;
   type: string;
@@ -34,9 +36,28 @@ export type Service = {
   host: string;
   port: number;
   txt: Record<string, true | Uint8Array | null>;
+  /** Whether the service is active or not. Will be `false` when a service responder has indicated it is going offline. */
   isActive: boolean;
 };
 
+/** Searches for DNS-SD services on the local network.
+ *
+ * ```
+ * for await (
+ *   const service of browse({
+ *     multicastInterface: new MulticastInterface(),
+ *     service: {
+ *       protocol: "tcp",
+ *       type: "http",
+ *     },
+ *   })
+ * ) {
+ *   if (service.isActive) {
+ *     console.log(`📡 ${service.name} - ${service.host}:${service.port}`);
+ *   }
+ * }
+ * ```
+ */
 export function browse(opts: BrowseOpts) {
   const subName = `${
     opts.service.subtypes && opts.service.subtypes.length > 0

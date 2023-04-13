@@ -255,13 +255,18 @@ export type ResourceRecord =
 	|      Additional     | RRs holding additional information
 	+---------------------+
 
-	*/
+*/
 
+/** A parsed DNS message. */
 export type DnsMessage = {
   header: DnsMessageHeader;
+  /** Question(s) for DNS responders */
   question: DnsQuestionSection[];
+  /** Resource records answering queries */
   answer: ResourceRecord[];
+  /** Resource records pointing towards an authority. */
   authority: ResourceRecord[];
+  /** Resource records related to this message. */
   additional: ResourceRecord[];
 };
 

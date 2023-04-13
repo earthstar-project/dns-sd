@@ -18,13 +18,15 @@ export interface MulticastDriver {
 
   setLoopback(loopback: boolean): Promise<void>;
 
+  /** Check if a given address belongs to this interface. */
   isOwnAddress(address: string): boolean;
 
   close(): void;
 }
 
 /** An interface used to send and receive multicast messages, as well as other actions such as toggling multicast loopback.
- * This class is able to work on different runtimes by using a `MulticastDriver` made for that runtime.
+ *
+ * If no driver is specified, selects a `MulticastDriver` appropriate to the current runtime.
  */
 export class MulticastInterface {
   private driver: MulticastDriver;

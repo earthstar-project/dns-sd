@@ -11,7 +11,7 @@ import {
 import { MulticastInterface } from "../mdns/multicast_interface.ts";
 import { respond } from "../mdns/responder.ts";
 
-type AdvertiseOpts = {
+export type AdvertiseOpts = {
   service: {
     name: string;
     type: string;
@@ -22,9 +22,16 @@ type AdvertiseOpts = {
     txt: Record<string, true | Uint8Array | null>;
   };
   multicastInterface: MulticastInterface;
+  /** A signal used to stop advertising. */
   signal?: AbortSignal;
 };
 
+/** Advertise a service over multicast DNS.
+ *
+ * Returns a promise which will reject if fifteen failed attempts to claim a name are made within a ten second interval.
+ *
+ * If the service has to be renamed due to a conflict, a warning with the new name will be sent to the console.
+ */
 export async function advertise(opts: AdvertiseOpts) {
   let attemptsInLastTenSeconds = 0;
   const removalTimers: number[] = [];
@@ -132,7 +139,7 @@ export async function advertise(opts: AdvertiseOpts) {
         txtRecord,
         hostNameRecord,
       ],
-      minterface: opts.multicastInterface,
+      multicastInterface: opts.multicastInterface,
       signal: opts.signal,
     }).catch(async (failure: "name_taken" | "simultaneous_probe") => {
       if (failure === "simultaneous_probe") {

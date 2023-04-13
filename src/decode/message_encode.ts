@@ -18,7 +18,12 @@ import {
 } from "./types.ts";
 import { concat } from "https://deno.land/std@0.177.0/bytes/mod.ts";
 
-/** Encode a DNS message as bytes */
+/** Encode a DNS message as Uint8Array.
+ *
+ * Compresses domain names, so re-encoded messages may come out smaller.
+ *
+ * Will never use the `TC` flag in the header.
+ */
 export function encodeMessage(msg: DnsMessage): Uint8Array {
   // Encode header
   const header = encodeHeader(msg.header);

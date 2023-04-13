@@ -7,7 +7,10 @@ import {
   ResourceType,
 } from "./types.ts";
 
-/** Decode a DNS message from bytes */
+/** Decode a DNS message from `Uint8Array`.
+ *
+ * Resource Records of the following types will have their RDATA decoded: `A`, `PTR`, `TXT`, `AAAA`, `SRV`, `NSEC`. Other types of resource records will have their RDATA left as `Uint8Array`.
+ */
 export function decodeMessage(message: Uint8Array): DnsMessage {
   const header = decodeHeader(message);
 

@@ -30,11 +30,11 @@ export type RespondingRecord = ResourceRecord & {
 export type RespondOpts = {
   /** The DNS records a responder wants to be authoritative for */
   proposedRecords: RespondingRecord[];
-  minterface: MulticastInterface;
+  multicastInterface: MulticastInterface;
   signal?: AbortSignal;
 };
 
-/** Run a multicast DNS responder.
+/** Runs a multicast DNS responder for the given resource records.
  *
  * Returns a promise that will reject when:
  * - Probing for proposed records fails
@@ -53,14 +53,14 @@ export async function respond(opts: RespondOpts) {
     return Promise.reject(probeResponse);
   }
 
-  const sender = new AggregatingScheduledSend(opts.minterface);
+  const sender = new AggregatingScheduledSend(opts.multicastInterface);
 
   const respondPromise = deferred();
 
   if (opts.signal) {
     opts.signal.addEventListener("abort", () => {
       // Send goodbye packets for all our records.
-      opts.minterface.send({
+      opts.multicastInterface.send({
         header: {
           ID: 0,
           QR: 1,
@@ -101,13 +101,13 @@ export async function respond(opts: RespondOpts) {
 
   // Respond.
   (async () => {
-    for await (const [message, host] of opts.minterface.messages()) {
+    for await (const [message, host] of opts.multicastInterface.messages()) {
       if (aborted) {
         break;
       }
 
       // Ignore messages from ourselves
-      if (opts.minterface.isOwnAddress(host.hostname)) {
+      if (opts.multicastInterface.isOwnAddress(host.hostname)) {
         continue;
       }
 
@@ -117,7 +117,7 @@ export async function respond(opts: RespondOpts) {
           message.question,
           opts.proposedRecords,
           message.answer,
-          opts.minterface.family,
+          opts.multicastInterface.family,
         );
 
         // Make sure TTL is good for all records.
@@ -490,7 +490,7 @@ class AggregatingScheduledSend {
 
 type ProbeOpts = {
   proposedRecords: ResourceRecord[];
-  minterface: MulticastInterface;
+  multicastInterface: MulticastInterface;
   untilFirstProbeMs?: number;
   signal?: AbortSignal;
 };
@@ -530,13 +530,13 @@ function probe(opts: ProbeOpts): Promise<ProbeResult> {
   // Listen for incoming answers to our probe.
   // AND for other host probing for the same name.
   (async () => {
-    for await (const [message, host] of opts.minterface.messages()) {
+    for await (const [message, host] of opts.multicastInterface.messages()) {
       // Is this something we sent ourselves?
       if (firstProbeSent === false) {
         continue;
       }
 
-      if (opts.minterface.isOwnAddress(host.hostname)) {
+      if (opts.multicastInterface.isOwnAddress(host.hostname)) {
         continue;
       }
 
@@ -616,7 +616,7 @@ function probe(opts: ProbeOpts): Promise<ProbeResult> {
   let probeCount = 0;
 
   const sendProbe = () => {
-    opts.minterface.send(probeMessage).then(() => {
+    opts.multicastInterface.send(probeMessage).then(() => {
       firstProbeSent = true;
       probeCount++;
 
@@ -693,10 +693,10 @@ async function announce(opts: RespondOpts) {
   // Two announcements, one second apart.
   const announcePromise = deferred();
 
-  await opts.minterface.send(announceMessage);
+  await opts.multicastInterface.send(announceMessage);
 
   const secondAnnounceTimer = setTimeout(async () => {
-    await opts.minterface.send(announceMessage);
+    await opts.multicastInterface.send(announceMessage);
     announcePromise.resolve();
   }, 1000);
 
@@ -850,27 +850,6 @@ function canAnswerAllQuestions(
   }
 
   return canAnswerAllQuestions;
-}
-
-/** Checks if *any* of the given answers answer any of the given questions. */
-function hasAnyAnswersForQuestions(
-  questions: DnsQuestionSection[],
-  answers: ResourceRecord[],
-): boolean {
-  for (const question of questions) {
-    for (const record of answers) {
-      const isRightType = record.TYPE === question.QTYPE ||
-        question.QTYPE === ResourceType.ANY;
-      const isRightName = record.NAME.join(".").toUpperCase() ===
-        question.QNAME.join(".").toUpperCase();
-
-      if (isRightType && isRightName) {
-        return true;
-      }
-    }
-  }
-
-  return false;
 }
 
 /** Checks if *any* of the given unique answers answer any of the given questions. */

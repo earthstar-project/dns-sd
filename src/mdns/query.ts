@@ -21,7 +21,18 @@ export type MdnsQuestion = {
 
 /** A continuous multicast DNS query.
  *
- * Can be used as an asynchronous iterator which reports additions and expirations to a cache of answers to this query.
+ * Reports additions, flushes, and expirations of resource records answering the given query via an asynchronous iterator:
+ *
+ * ```ts
+ * const query = new Query(
+ *   [{ name: '_http._tcp.local', recordType: 255 }],
+ *   multicastInterface: new MulticastInterface()
+ * );
+ *
+ * for await (const event of query) {
+ *   console.log(event)
+ * }
+ * ```
  */
 export class Query {
   private questions: MdnsQuestion[];
@@ -254,6 +265,7 @@ export class Query {
     return this.additionalRecords.getRecords();
   }
 
+  /** Stop this query from running. */
   end() {
     this.ended = true;
     this.recordCache.close();

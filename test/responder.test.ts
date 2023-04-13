@@ -23,7 +23,7 @@ Deno.test("Probes for the record it wishes to be unique for", async () => {
     sentMessages.push(msg);
   });
 
-  const minterface = new MulticastInterface(testDriver);
+  const multicastInterface = new MulticastInterface(testDriver);
 
   const proposedRecord: RespondingRecord = {
     NAME: ["my", "proposed", "record"],
@@ -38,7 +38,7 @@ Deno.test("Probes for the record it wishes to be unique for", async () => {
   const abortController = new AbortController();
 
   respond({
-    minterface,
+    multicastInterface,
     proposedRecords: [proposedRecord],
     signal: abortController.signal,
   });
@@ -64,7 +64,7 @@ Deno.test("Waits 0 - 250ms to send the first probe", async () => {
     sentMessages.push(msg);
   });
 
-  const minterface = new MulticastInterface(testDriver);
+  const multicastInterface = new MulticastInterface(testDriver);
 
   const proposedRecord: ResourceRecord = {
     NAME: ["my", "proposed", "record"],
@@ -79,7 +79,7 @@ Deno.test("Waits 0 - 250ms to send the first probe", async () => {
   const abortController = new AbortController();
 
   respond({
-    minterface,
+    multicastInterface,
     proposedRecords: [proposedRecord],
     signal: abortController.signal,
   });
@@ -100,7 +100,7 @@ Deno.test("Sends a probe packet every 250ms, three times only", async () => {
     sentMessages.push(msg);
   });
 
-  const minterface = new MulticastInterface(testDriver);
+  const multicastInterface = new MulticastInterface(testDriver);
 
   const proposedRecord: ResourceRecord = {
     NAME: ["my", "proposed", "record"],
@@ -115,7 +115,7 @@ Deno.test("Sends a probe packet every 250ms, three times only", async () => {
   const abortController = new AbortController();
 
   respond({
-    minterface,
+    multicastInterface,
     proposedRecords: [proposedRecord],
     signal: abortController.signal,
   }).catch(() => {
@@ -165,7 +165,7 @@ Deno.test("Switches to announcing after three unanswered probes sent", async () 
     sentMessages.push(msg);
   });
 
-  const minterface = new MulticastInterface(testDriver);
+  const multicastInterface = new MulticastInterface(testDriver);
 
   const proposedRecord: ResourceRecord = {
     NAME: ["my", "proposed", "record"],
@@ -180,7 +180,7 @@ Deno.test("Switches to announcing after three unanswered probes sent", async () 
   const abortController = new AbortController();
 
   respond({
-    minterface,
+    multicastInterface,
     proposedRecords: [proposedRecord],
     signal: abortController.signal,
   }).catch(() => {});
@@ -205,7 +205,7 @@ Deno.test({
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedRecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -222,7 +222,7 @@ Deno.test({
     let didReject = false;
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -286,8 +286,8 @@ Deno.test({
       testDriverWinner.sendInboundMessage(msg, "1.1.1.1");
     });
 
-    const minterfaceWinner = new MulticastInterface(testDriverWinner);
-    const minterfaceLoser = new MulticastInterface(testDriverLoser);
+    const multicastInterfaceWinner = new MulticastInterface(testDriverWinner);
+    const multicastInterfaceLoser = new MulticastInterface(testDriverLoser);
 
     // A single A record
 
@@ -316,7 +316,7 @@ Deno.test({
     let winnerDidNotReject = true;
 
     respond({
-      minterface: minterfaceWinner,
+      multicastInterface: multicastInterfaceWinner,
       proposedRecords: [winningRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -325,7 +325,7 @@ Deno.test({
 
     await assertRejects(() => {
       return respond({
-        minterface: minterfaceLoser,
+        multicastInterface: multicastInterfaceLoser,
         proposedRecords: [losingRecord],
         signal: abortController.signal,
       });
@@ -384,7 +384,7 @@ Deno.test({
     let manyWinnerDidNotReject = true;
 
     respond({
-      minterface: minterfaceWinner,
+      multicastInterface: multicastInterfaceWinner,
       proposedRecords: winningRecords,
       signal: abortControllerMany.signal,
     }).catch(() => {
@@ -393,7 +393,7 @@ Deno.test({
 
     await assertRejects(() => {
       return respond({
-        minterface: minterfaceLoser,
+        multicastInterface: multicastInterfaceLoser,
         proposedRecords: losingRecords,
         signal: abortControllerMany.signal,
       });
@@ -418,8 +418,8 @@ Deno.test({
       testDriverA.sendInboundMessage(msg, "7.7.7.7");
     });
 
-    const minterfaceA = new MulticastInterface(testDriverA);
-    const minterfaceB = new MulticastInterface(testDriverB);
+    const multicastInterfaceA = new MulticastInterface(testDriverA);
+    const multicastInterfaceB = new MulticastInterface(testDriverB);
     const abortController = new AbortController();
 
     const losingRecord: ResourceRecord = {
@@ -446,7 +446,7 @@ Deno.test({
     let bRejected = false;
 
     respond({
-      minterface: minterfaceA,
+      multicastInterface: multicastInterfaceA,
       proposedRecords: [winningRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -454,7 +454,7 @@ Deno.test({
     });
 
     respond({
-      minterface: minterfaceB,
+      multicastInterface: multicastInterfaceB,
       proposedRecords: [losingRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -481,7 +481,7 @@ Deno.test({
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedRecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -497,7 +497,7 @@ Deno.test({
     const abortController = new AbortController();
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -522,7 +522,7 @@ Deno.test({
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedRecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -539,7 +539,7 @@ Deno.test({
     let didReject = false;
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -604,7 +604,7 @@ Deno.test({
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedRecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -619,7 +619,7 @@ Deno.test({
     const abortController = new AbortController();
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -679,7 +679,7 @@ Deno.test({
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedARecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -704,7 +704,7 @@ Deno.test({
     const abortController = new AbortController();
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedARecord, proposedPtrRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -764,7 +764,7 @@ Deno.test({
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedARecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -789,7 +789,7 @@ Deno.test({
     const abortController = new AbortController();
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedARecord, proposedPtrRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -853,7 +853,7 @@ Deno.test({
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedRecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -868,7 +868,7 @@ Deno.test({
     const abortController = new AbortController();
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -928,7 +928,7 @@ Deno.test({
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedARecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -953,7 +953,7 @@ Deno.test({
     const abortController = new AbortController();
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedARecord, proposedPtrRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -1017,7 +1017,7 @@ Deno.test({
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedRecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -1032,7 +1032,7 @@ Deno.test({
     const abortController = new AbortController();
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -1092,7 +1092,7 @@ Deno.test({
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const additionalRecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -1118,7 +1118,7 @@ Deno.test({
     const abortController = new AbortController();
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -1182,7 +1182,7 @@ Deno.test({
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedRecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -1197,7 +1197,7 @@ Deno.test({
     const abortController = new AbortController();
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -1257,7 +1257,7 @@ Deno.test({
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedRecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -1272,7 +1272,7 @@ Deno.test({
     const abortController = new AbortController();
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -1302,12 +1302,12 @@ Deno.test({
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const abortController = new AbortController();
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [{
         NAME: ["my", "proposed", "record"],
         CLASS: DnsClass.IN,
@@ -1404,15 +1404,3 @@ Deno.test({
     abortController.abort();
   },
 });
-
-// These are now the responsibility of the DNS-SD layer
-
-/*
-
-Deno.test("If a conflicting response is received after querying, choose new resource record names", () => {});
-Deno.test("If there are fifteen conflicts within ten seconds, wait five seconds before each successive probe attempt", () => {});
-
-Deno.test("Switches to probing after being resumed", () => {});
-Deno.test("Announces unique records with cache-flush bit set after resuming and successful probe", () => {});
-
-*/

@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "test": "deno test -A --unstable test"
+  },
+  "lock": false
+}
