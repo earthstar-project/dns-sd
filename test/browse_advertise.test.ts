@@ -226,4 +226,69 @@ Deno.test({
   },
 });
 
-// When something goodbyes or expires, the browser should say how the service has gone down.
+Deno.test({
+  name:
+    "When an advertisement is aborted, a browser should report it as inactive",
+  fn: async () => {
+    const browserDriver = new TestMulticastDriver("0.0.0.0", (msg) => {
+      adv1Driver1.sendInboundMessage(msg, "0.0.0.0");
+    });
+
+    const adv1Driver1 = new TestMulticastDriver("1.1.1.1", (msg) => {
+      browserDriver.sendInboundMessage(msg, "1.1.1.1");
+    });
+
+    const browserInt = new MulticastInterface(browserDriver);
+    const adv1Int = new MulticastInterface(adv1Driver1);
+
+    const abortController = new AbortController();
+    const advertismentAbortController = new AbortController();
+
+    const services: Service[] = [];
+
+    (async () => {
+      for await (
+        const service of browse({
+          multicastInterface: browserInt,
+          service: {
+            protocol: "tcp",
+            subtypes: ["test"],
+            type: "http",
+          },
+          signal: abortController.signal,
+        })
+      ) {
+        services.push(service);
+      }
+    })();
+
+    advertise({
+      multicastInterface: adv1Int,
+      signal: advertismentAbortController.signal,
+      service: {
+        name: "Short and sweet",
+        host: "1.1.1.1",
+        port: 5353,
+        protocol: "tcp",
+        type: "http",
+        subtypes: ["test"],
+        txt: {
+          isTesting: true,
+        },
+      },
+    }).catch(() => {
+      // Happens on abort.
+    });
+
+    await delay(2500);
+
+    advertismentAbortController.abort();
+
+    await delay(1500);
+
+    assertEquals(services.length, 2);
+    assertEquals(services[1].isActive, false);
+
+    abortController.abort();
+  },
+});

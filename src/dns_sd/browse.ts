@@ -93,6 +93,20 @@ export function browse(opts: BrowseOpts) {
 
             services.set(key, service);
           }
+          break;
+        case "EXPIRED":
+          if (isResourceRecordPTR(event.record)) {
+            const key = event.record.RDATA.join(".");
+
+            const service = services.get(key);
+
+            if (!service) {
+              continue;
+            }
+
+            service.close();
+            services.delete(key);
+          }
       }
     }
   })();
@@ -278,6 +292,11 @@ class ServiceResolver {
       txt: this.txtRecord.RDATA,
       isActive: !wentInactive,
     });
+  }
+
+  close() {
+    this.update(true);
+    this.fifo.close();
   }
 
   // Return an async iterator with events of being resolved, updated, going down.
