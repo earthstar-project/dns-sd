@@ -1,4 +1,3 @@
-import { delay } from "https://deno.land/std@0.177.0/async/delay.ts";
 import {
   DnsClass,
   ResourceRecordA,
@@ -143,7 +142,9 @@ export async function advertise(opts: AdvertiseOpts) {
       signal: opts.signal,
     }).catch(async (failure: "name_taken" | "simultaneous_probe") => {
       if (failure === "simultaneous_probe") {
-        await delay(1000);
+        await new Promise((res) => {
+          setTimeout(res, 1000);
+        });
         return;
       } else if (failure === "name_taken") {
         attemptsInLastTenSeconds += 1;

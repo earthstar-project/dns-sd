@@ -714,8 +714,8 @@ function sortManyRecords(
   aRecords: ResourceRecord[],
   bRecords: ResourceRecord[],
 ) {
-  const aSorted = aRecords.toSorted(recordSort);
-  const bSorted = bRecords.toSorted(recordSort);
+  const aSorted = [...aRecords].sort(recordSort);
+  const bSorted = [...bRecords].sort(recordSort);
 
   for (let i = 0; i < Math.max(aSorted.length, bSorted.length); i++) {
     // This means b has more records than a, so b comes lexicographically later.
