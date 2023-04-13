@@ -27,8 +27,9 @@ export class DefaultDriver implements MulticastDriver {
     this.socket = socket;
     this.address = family === "IPv4" ? "0.0.0.0" : "::";
 
-    socket.bind(MDNS_PORT, this.address);
-    socket.addMembership(family === "IPv4" ? MDNS_IPV4 : MDNS_IPV6);
+    socket.bind(MDNS_PORT, undefined, () => {
+      socket.addMembership(family === "IPv4" ? MDNS_IPV4 : MDNS_IPV6);
+    });
 
     socket.on("message", (msg: Buffer, rinfo: RemoteInfo) => {
       this.messages.push([
