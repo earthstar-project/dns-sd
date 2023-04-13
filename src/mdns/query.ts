@@ -7,20 +7,32 @@ import {
 } from "../decode/types.ts";
 import { FastFIFO } from "../fast_fifo.ts";
 import { MulticastInterface } from "./multicast_interface.ts";
+import { isConflicting, recordSort } from "./responder.ts";
 
 const ONE_SECOND_MS = 1000;
 
 /** The number of milliseconds in an hour. */
 const ONE_HOUR_MS = ONE_SECOND_MS * 60 * 60;
 
-type MdnsQuestion = {
+export type MdnsQuestion = {
   name: string;
   recordType: ResourceType;
 };
 
 /** A continuous multicast DNS query.
  *
- * Can be used as an asynchronous iterator which reports additions and expirations to a cache of answers to this query.
+ * Reports additions, flushes, and expirations of resource records answering the given query via an asynchronous iterator:
+ *
+ * ```ts
+ * const query = new Query(
+ *   [{ name: '_http._tcp.local', recordType: 255 }],
+ *   multicastInterface: new MulticastInterface()
+ * );
+ *
+ * for await (const event of query) {
+ *   console.log(event)
+ * }
+ * ```
  */
 export class Query {
   private questions: MdnsQuestion[];
@@ -37,6 +49,7 @@ export class Query {
   private scheduled: number[] = [];
   private ended = false;
   private suppressedQuestions = new Set<MdnsQuestion>();
+  private additionalRecords = new SimpleRecordStore();
 
   constructor(
     questions: MdnsQuestion[],
@@ -50,7 +63,7 @@ export class Query {
 
     // Long running query for some records.
     (async () => {
-      for await (const [message, host] of multicastInterface) {
+      for await (const [message, host] of multicastInterface.messages()) {
         if (this.ended) {
           break;
         }
@@ -124,12 +137,12 @@ export class Query {
 
   private handleQuery(
     query: DnsMessage,
-    host: { address: string; port: number },
+    host: { hostname: string; port: number },
   ) {
     // It's a query.
 
     // Is this something we sent ourselves?
-    if (host.address === this.minterface.address) {
+    if (host.hostname === this.minterface.address) {
       return;
     }
 
@@ -171,6 +184,7 @@ export class Query {
 
   private handleResponse(response: DnsMessage) {
     // Check if any of the records matches our query...
+    let additionalAdded = false;
 
     for (const record of response.answer) {
       const answersAnyQuestion = this.askedQuestionFor(record);
@@ -178,9 +192,17 @@ export class Query {
       if (!answersAnyQuestion) {
         // Not a matching record
         continue;
+      } else if (additionalAdded === false) {
+        // Add all additional records to the cache if there were any answers in this response.
+        for (const additionalRecord of response.additional) {
+          this.additionalRecords.addRecord(additionalRecord);
+        }
+
+        additionalAdded = true;
       }
 
       // It IS a matching record, so add it to our cache.
+
       this.recordCache.addRecord(record);
     }
   }
@@ -233,6 +255,17 @@ export class Query {
     await this.minterface.send(message);
   }
 
+  /** All answers obtained over the life of this query. */
+  answers(): ResourceRecord[] {
+    return this.recordCache.getRecords();
+  }
+
+  /** All additional records obtained from responses which had valid answers in them. */
+  additional(): ResourceRecord[] {
+    return this.additionalRecords.getRecords();
+  }
+
+  /** Stop this query from running. */
   end() {
     this.ended = true;
     this.recordCache.close();
@@ -272,7 +305,19 @@ class RecordCache {
     this.events.close();
   }
 
+  getRecords(): ResourceRecord[] {
+    return Array.from(this.records.keys());
+  }
+
   addRecord(record: ResourceRecord) {
+    const expire = () => {
+      this.expireRecord(record);
+    };
+
+    const requery = () => {
+      this.onRequery(record);
+    };
+
     // Handle goodbye packets with a TTL of 0.
     if (record.TTL === 0) {
       // Set to expire in 1 second (section 10.1 of RFC 6762)
@@ -288,14 +333,6 @@ class RecordCache {
       return;
     }
 
-    const expire = () => {
-      this.expireRecord(record);
-    };
-
-    const requery = () => {
-      this.onRequery(record);
-    };
-
     // If it's unique, flush all records with same name, rrtype, and rrclass.
     if (record.isUnique) {
       for (const [prevRecord] of this.records) {
@@ -304,6 +341,11 @@ class RecordCache {
           record.TYPE === prevRecord.TYPE &&
           record.CLASS === prevRecord.CLASS
         ) {
+          if (recordSort(record, prevRecord) === 0) {
+            // RDATA is the same. Don't flush it.
+            return;
+          }
+
           this.removeRecord(prevRecord);
 
           this.events.push({
@@ -363,7 +405,7 @@ class RecordCache {
 
   /** Return all records in the cache matching a set of questions. Used for known-answer suppression.*/
   knownAnswers(questions: MdnsQuestion[]) {
-    const knownAnswers: ResourceRecord[] = [];
+    const knownAnswers = new Set<ResourceRecord>();
 
     for (const [record] of this.records) {
       let answersAnyQuestion = false;
@@ -371,18 +413,37 @@ class RecordCache {
       for (const question of questions) {
         if (
           record.TYPE === question.recordType &&
-          record.NAME.join(".") === question.name
+          record.NAME.join(".").toUpperCase() === question.name.toUpperCase()
         ) {
           answersAnyQuestion = true;
         }
       }
 
       if (answersAnyQuestion) {
-        knownAnswers.push(record);
+        knownAnswers.add(record);
       }
     }
 
-    return knownAnswers;
+    return Array.from(knownAnswers);
+  }
+}
+
+/** A simple record store which replaces conflicting records. */
+class SimpleRecordStore {
+  private records = new Set<ResourceRecord>();
+
+  addRecord(record: ResourceRecord) {
+    for (const existingRecord of this.records) {
+      if (isConflicting(record, existingRecord)) {
+        this.records.delete(existingRecord);
+      }
+    }
+
+    this.records.add(record);
+  }
+
+  getRecords() {
+    return Array.from(this.records);
   }
 }
 

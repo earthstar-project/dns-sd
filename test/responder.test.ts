@@ -8,7 +8,7 @@ import {
   ResourceType,
 } from "../src/decode/types.ts";
 import { MulticastInterface } from "../src/mdns/multicast_interface.ts";
-import { respond } from "../src/mdns/responder.ts";
+import { respond, RespondingRecord } from "../src/mdns/responder.ts";
 import { TestMulticastDriver } from "./test_multicast_driver.ts";
 import {
   assert,
@@ -19,13 +19,13 @@ import {
 Deno.test("Probes for the record it wishes to be unique for", async () => {
   const sentMessages: DnsMessage[] = [];
 
-  const testDriver = new TestMulticastDriver((msg) => {
+  const testDriver = new TestMulticastDriver("0.0.0.0", (msg) => {
     sentMessages.push(msg);
   });
 
-  const minterface = new MulticastInterface(testDriver);
+  const multicastInterface = new MulticastInterface(testDriver);
 
-  const proposedRecord: ResourceRecord = {
+  const proposedRecord: RespondingRecord = {
     NAME: ["my", "proposed", "record"],
     CLASS: DnsClass.IN,
     TYPE: ResourceType.A,
@@ -38,7 +38,7 @@ Deno.test("Probes for the record it wishes to be unique for", async () => {
   const abortController = new AbortController();
 
   respond({
-    minterface,
+    multicastInterface,
     proposedRecords: [proposedRecord],
     signal: abortController.signal,
   });
@@ -60,11 +60,11 @@ Deno.test("Probes for the record it wishes to be unique for", async () => {
 Deno.test("Waits 0 - 250ms to send the first probe", async () => {
   const sentMessages: DnsMessage[] = [];
 
-  const testDriver = new TestMulticastDriver((msg) => {
+  const testDriver = new TestMulticastDriver("0.0.0.0", (msg) => {
     sentMessages.push(msg);
   });
 
-  const minterface = new MulticastInterface(testDriver);
+  const multicastInterface = new MulticastInterface(testDriver);
 
   const proposedRecord: ResourceRecord = {
     NAME: ["my", "proposed", "record"],
@@ -79,7 +79,7 @@ Deno.test("Waits 0 - 250ms to send the first probe", async () => {
   const abortController = new AbortController();
 
   respond({
-    minterface,
+    multicastInterface,
     proposedRecords: [proposedRecord],
     signal: abortController.signal,
   });
@@ -96,11 +96,11 @@ Deno.test("Waits 0 - 250ms to send the first probe", async () => {
 Deno.test("Sends a probe packet every 250ms, three times only", async () => {
   const sentMessages: DnsMessage[] = [];
 
-  const testDriver = new TestMulticastDriver((msg) => {
+  const testDriver = new TestMulticastDriver("0.0.0.0", (msg) => {
     sentMessages.push(msg);
   });
 
-  const minterface = new MulticastInterface(testDriver);
+  const multicastInterface = new MulticastInterface(testDriver);
 
   const proposedRecord: ResourceRecord = {
     NAME: ["my", "proposed", "record"],
@@ -115,7 +115,7 @@ Deno.test("Sends a probe packet every 250ms, three times only", async () => {
   const abortController = new AbortController();
 
   respond({
-    minterface,
+    multicastInterface,
     proposedRecords: [proposedRecord],
     signal: abortController.signal,
   }).catch(() => {
@@ -161,11 +161,11 @@ Deno.test("Sends a probe packet every 250ms, three times only", async () => {
 Deno.test("Switches to announcing after three unanswered probes sent", async () => {
   const sentMessages: DnsMessage[] = [];
 
-  const testDriver = new TestMulticastDriver((msg) => {
+  const testDriver = new TestMulticastDriver("0.0.0.0", (msg) => {
     sentMessages.push(msg);
   });
 
-  const minterface = new MulticastInterface(testDriver);
+  const multicastInterface = new MulticastInterface(testDriver);
 
   const proposedRecord: ResourceRecord = {
     NAME: ["my", "proposed", "record"],
@@ -180,7 +180,7 @@ Deno.test("Switches to announcing after three unanswered probes sent", async () 
   const abortController = new AbortController();
 
   respond({
-    minterface,
+    multicastInterface,
     proposedRecords: [proposedRecord],
     signal: abortController.signal,
   }).catch(() => {});
@@ -201,11 +201,11 @@ Deno.test({
   fn: async () => {
     const sentMessages: DnsMessage[] = [];
 
-    const testDriver = new TestMulticastDriver((msg) => {
+    const testDriver = new TestMulticastDriver("0.0.0.0", (msg) => {
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedRecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -222,7 +222,7 @@ Deno.test({
     let didReject = false;
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -263,10 +263,7 @@ Deno.test({
       answer: [conflictingRecord],
       authority: [],
       additional: [],
-    }, {
-      address: "8.8.8.8",
-      port: 5353,
-    });
+    }, "8.8.8.8");
 
     await delay(1);
 
@@ -279,25 +276,18 @@ Deno.test({
 Deno.test({
   name:
     "If another host is probing for the same record simulataneously, the losing side rejects, and the winning side goes on to announcing.",
-
   fn: async () => {
     // Set up two announcements
-    const testDriverWinner = new TestMulticastDriver((msg) => {
-      testDriverLoser.sendInboundMessage(msg, {
-        address: "7.7.7.7",
-        port: 5343,
-      });
+    const testDriverWinner = new TestMulticastDriver("0.0.0.0", (msg) => {
+      testDriverLoser.sendInboundMessage(msg, "0.0.0.0");
     });
 
-    const testDriverLoser = new TestMulticastDriver((msg) => {
-      testDriverWinner.sendInboundMessage(msg, {
-        address: "0.0.0.0",
-        port: 5343,
-      });
+    const testDriverLoser = new TestMulticastDriver("1.1.1.1", (msg) => {
+      testDriverWinner.sendInboundMessage(msg, "1.1.1.1");
     });
 
-    const minterfaceWinner = new MulticastInterface(testDriverWinner);
-    const minterfaceLoser = new MulticastInterface(testDriverLoser);
+    const multicastInterfaceWinner = new MulticastInterface(testDriverWinner);
+    const multicastInterfaceLoser = new MulticastInterface(testDriverLoser);
 
     // A single A record
 
@@ -326,7 +316,7 @@ Deno.test({
     let winnerDidNotReject = true;
 
     respond({
-      minterface: minterfaceWinner,
+      multicastInterface: multicastInterfaceWinner,
       proposedRecords: [winningRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -335,7 +325,7 @@ Deno.test({
 
     await assertRejects(() => {
       return respond({
-        minterface: minterfaceLoser,
+        multicastInterface: multicastInterfaceLoser,
         proposedRecords: [losingRecord],
         signal: abortController.signal,
       });
@@ -373,7 +363,7 @@ Deno.test({
         NAME: ["my", "proposed", "record"],
         CLASS: DnsClass.IN,
         TYPE: ResourceType.A,
-        RDATA: [4, 4, 4, 4],
+        RDATA: [5, 5, 5, 5],
         isUnique: true,
         TTL: 70,
         RDLENGTH: 4,
@@ -394,7 +384,7 @@ Deno.test({
     let manyWinnerDidNotReject = true;
 
     respond({
-      minterface: minterfaceWinner,
+      multicastInterface: multicastInterfaceWinner,
       proposedRecords: winningRecords,
       signal: abortControllerMany.signal,
     }).catch(() => {
@@ -403,7 +393,7 @@ Deno.test({
 
     await assertRejects(() => {
       return respond({
-        minterface: minterfaceLoser,
+        multicastInterface: multicastInterfaceLoser,
         proposedRecords: losingRecords,
         signal: abortControllerMany.signal,
       });
@@ -412,65 +402,6 @@ Deno.test({
     assert(manyWinnerDidNotReject);
 
     abortControllerMany.abort();
-
-    // One side with more records than the other
-
-    const losingRecordsLess: ResourceRecord[] = [
-      {
-        NAME: ["my", "proposed", "record"],
-        CLASS: DnsClass.IN,
-        TYPE: ResourceType.A,
-        RDATA: [4, 4, 4, 4],
-        isUnique: true,
-        TTL: 70,
-        RDLENGTH: 4,
-      },
-    ];
-
-    const winningRecordsMore: ResourceRecord[] = [
-      {
-        NAME: ["my", "proposed", "record"],
-        CLASS: DnsClass.IN,
-        TYPE: ResourceType.A,
-        RDATA: [4, 4, 4, 4],
-        isUnique: true,
-        TTL: 70,
-        RDLENGTH: 4,
-      },
-      {
-        NAME: ["my", "proposed", "record"],
-        CLASS: DnsClass.IN,
-        TYPE: ResourceType.PTR,
-        RDATA: ["1", "1", "1"],
-        isUnique: false,
-        TTL: 70,
-        RDLENGTH: 4,
-      },
-    ];
-
-    const abortControllerOneLonger = new AbortController();
-
-    let moreWinnerDidNotReject = true;
-
-    respond({
-      minterface: minterfaceWinner,
-      proposedRecords: winningRecordsMore,
-      signal: abortControllerOneLonger.signal,
-    }).catch(() => {
-      moreWinnerDidNotReject = false;
-    });
-
-    await assertRejects(() => {
-      return respond({
-        minterface: minterfaceLoser,
-        proposedRecords: losingRecordsLess,
-        signal: abortControllerOneLonger.signal,
-      });
-    });
-
-    assert(moreWinnerDidNotReject);
-
-    abortControllerOneLonger.abort();
   },
 });
 
@@ -479,22 +410,16 @@ Deno.test({
     "If another host is probing for the same record simulataneously, and no conflict is found, neither rejects as this is fine.",
   fn: async () => {
     // Set up two announcements
-    const testDriverA = new TestMulticastDriver((msg) => {
-      testDriverB.sendInboundMessage(msg, {
-        address: "7.7.7.7",
-        port: 5343,
-      });
+    const testDriverA = new TestMulticastDriver("0.0.0.0", (msg) => {
+      testDriverB.sendInboundMessage(msg, "7.7.7.7");
     });
 
-    const testDriverB = new TestMulticastDriver((msg) => {
-      testDriverA.sendInboundMessage(msg, {
-        address: "0.0.0.0",
-        port: 5343,
-      });
+    const testDriverB = new TestMulticastDriver("1.1.1.1", (msg) => {
+      testDriverA.sendInboundMessage(msg, "7.7.7.7");
     });
 
-    const minterfaceA = new MulticastInterface(testDriverA);
-    const minterfaceB = new MulticastInterface(testDriverB);
+    const multicastInterfaceA = new MulticastInterface(testDriverA);
+    const multicastInterfaceB = new MulticastInterface(testDriverB);
     const abortController = new AbortController();
 
     const losingRecord: ResourceRecord = {
@@ -521,7 +446,7 @@ Deno.test({
     let bRejected = false;
 
     respond({
-      minterface: minterfaceA,
+      multicastInterface: multicastInterfaceA,
       proposedRecords: [winningRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -529,7 +454,7 @@ Deno.test({
     });
 
     respond({
-      minterface: minterfaceB,
+      multicastInterface: multicastInterfaceB,
       proposedRecords: [losingRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -552,11 +477,11 @@ Deno.test({
   fn: async () => {
     const sentMessages: DnsMessage[] = [];
 
-    const testDriver = new TestMulticastDriver((msg) => {
+    const testDriver = new TestMulticastDriver("0.0.0.0", (msg) => {
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedRecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -572,7 +497,7 @@ Deno.test({
     const abortController = new AbortController();
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -590,23 +515,21 @@ Deno.test({
 Deno.test({
   name:
     "Rejects if another response is seen with a conflicting record during responding phase",
-
   fn: async () => {
     const sentMessages: DnsMessage[] = [];
 
-    const testDriver = new TestMulticastDriver((msg) => {
+    const testDriver = new TestMulticastDriver("0.0.0.0", (msg) => {
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedRecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
       CLASS: DnsClass.IN,
       TYPE: ResourceType.A,
       RDATA: [5, 5, 5, 5],
-      // We set it false here deliberately
-      isUnique: false,
+      isUnique: true,
       TTL: 70,
       RDLENGTH: 4,
     };
@@ -616,7 +539,7 @@ Deno.test({
     let didReject = false;
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -659,10 +582,7 @@ Deno.test({
       answer: [conflictingRecord],
       authority: [],
       additional: [],
-    }, {
-      address: "8.8.8.8",
-      port: 5353,
-    });
+    }, "8.8.8.8");
 
     await delay(10);
 
@@ -680,11 +600,11 @@ Deno.test({
   fn: async () => {
     const sentMessages: DnsMessage[] = [];
 
-    const testDriver = new TestMulticastDriver((msg) => {
+    const testDriver = new TestMulticastDriver("0.0.0.0", (msg) => {
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedRecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -699,7 +619,7 @@ Deno.test({
     const abortController = new AbortController();
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -739,10 +659,7 @@ Deno.test({
       answer: [],
       authority: [],
       additional: [],
-    }, {
-      address: "9.9.9.9",
-      port: 5353,
-    });
+    }, "9.9.9.9");
 
     await delay(1);
 
@@ -758,11 +675,11 @@ Deno.test({
   fn: async () => {
     const sentMessages: DnsMessage[] = [];
 
-    const testDriver = new TestMulticastDriver((msg) => {
+    const testDriver = new TestMulticastDriver("0.0.0.0", (msg) => {
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedARecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -787,7 +704,7 @@ Deno.test({
     const abortController = new AbortController();
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedARecord, proposedPtrRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -827,10 +744,7 @@ Deno.test({
       answer: [],
       authority: [proposedARecord],
       additional: [],
-    }, {
-      address: "9.9.9.9",
-      port: 5353,
-    });
+    }, "9.9.9.9");
 
     await delay(1);
 
@@ -846,11 +760,11 @@ Deno.test({
   fn: async () => {
     const sentMessages: DnsMessage[] = [];
 
-    const testDriver = new TestMulticastDriver((msg) => {
+    const testDriver = new TestMulticastDriver("0.0.0.0", (msg) => {
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedARecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -875,7 +789,7 @@ Deno.test({
     const abortController = new AbortController();
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedARecord, proposedPtrRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -915,10 +829,7 @@ Deno.test({
       answer: [],
       authority: [],
       additional: [],
-    }, {
-      address: "9.9.9.9",
-      port: 5353,
-    });
+    }, "9.9.9.9");
 
     await delay(1);
 
@@ -938,11 +849,11 @@ Deno.test({
   fn: async () => {
     const sentMessages: DnsMessage[] = [];
 
-    const testDriver = new TestMulticastDriver((msg) => {
+    const testDriver = new TestMulticastDriver("0.0.0.0", (msg) => {
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedRecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -957,7 +868,7 @@ Deno.test({
     const abortController = new AbortController();
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -997,10 +908,7 @@ Deno.test({
       answer: [],
       authority: [],
       additional: [],
-    }, {
-      address: "9.9.9.9",
-      port: 5353,
-    });
+    }, "9.9.9.9");
 
     await delay(1);
 
@@ -1016,11 +924,11 @@ Deno.test({
   fn: async () => {
     const sentMessages: DnsMessage[] = [];
 
-    const testDriver = new TestMulticastDriver((msg) => {
+    const testDriver = new TestMulticastDriver("0.0.0.0", (msg) => {
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedARecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -1045,7 +953,7 @@ Deno.test({
     const abortController = new AbortController();
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedARecord, proposedPtrRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -1085,10 +993,7 @@ Deno.test({
       answer: [],
       authority: [],
       additional: [],
-    }, {
-      address: "9.9.9.9",
-      port: 5353,
-    });
+    }, "9.9.9.9");
 
     await delay(1);
 
@@ -1108,11 +1013,11 @@ Deno.test({
   fn: async () => {
     const sentMessages: DnsMessage[] = [];
 
-    const testDriver = new TestMulticastDriver((msg) => {
+    const testDriver = new TestMulticastDriver("0.0.0.0", (msg) => {
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedRecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -1127,7 +1032,7 @@ Deno.test({
     const abortController = new AbortController();
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -1167,15 +1072,99 @@ Deno.test({
       answer: [],
       authority: [],
       additional: [],
-    }, {
-      address: "9.9.9.9",
-      port: 5353,
-    });
+    }, "9.9.9.9");
 
     await delay(1);
 
     assertEquals(sentMessages[5].answer[0].NAME, proposedRecord.NAME);
     assertEquals(sentMessages[5].answer[0].RDATA, proposedRecord.RDATA);
+
+    abortController.abort();
+  },
+});
+
+Deno.test({
+  name: "Includes additional records with responses.",
+  fn: async () => {
+    const sentMessages: DnsMessage[] = [];
+
+    const testDriver = new TestMulticastDriver("0.0.0.0", (msg) => {
+      sentMessages.push(msg);
+    });
+
+    const multicastInterface = new MulticastInterface(testDriver);
+
+    const additionalRecord: ResourceRecord = {
+      NAME: ["my", "proposed", "record"],
+      CLASS: DnsClass.IN,
+      TYPE: ResourceType.AAAA,
+      RDATA: "::",
+      isUnique: true,
+      TTL: 70,
+      RDLENGTH: 16,
+    };
+
+    const proposedRecord: RespondingRecord = {
+      NAME: ["my", "proposed", "record"],
+      CLASS: DnsClass.IN,
+      TYPE: ResourceType.A,
+      RDATA: [5, 5, 5, 5],
+      isUnique: true,
+      TTL: 70,
+      RDLENGTH: 4,
+      additional: [additionalRecord],
+    };
+
+    const abortController = new AbortController();
+
+    respond({
+      multicastInterface,
+      proposedRecords: [proposedRecord],
+      signal: abortController.signal,
+    }).catch(() => {
+      // We aborted
+    });
+
+    await delay(2000);
+
+    // Three probes, two announces
+    assertEquals(sentMessages.length, 5);
+
+    testDriver.sendInboundMessage({
+      header: {
+        ID: 0,
+        QR: 0,
+        OPCODE: 0,
+        AA: 0,
+        TC: 0,
+        RD: 0,
+        RA: 0,
+        Z: 0,
+        AD: 0,
+        CD: 0,
+        RCODE: 0,
+        QDCOUNT: 1,
+        ANCOUNT: 0,
+        NSCOUNT: 0,
+        ARCOUNT: 0,
+      },
+      question: [
+        {
+          QCLASS: DnsClass.IN,
+          QNAME: ["my", "proposed", "record"],
+          QTYPE: ResourceType.ANY,
+        },
+      ],
+      answer: [],
+      authority: [],
+      additional: [],
+    }, "9.9.9.9");
+
+    await delay(1);
+
+    assertEquals(sentMessages[5].answer[0].NAME, proposedRecord.NAME);
+    assertEquals(sentMessages[5].answer[0].RDATA, proposedRecord.RDATA);
+    assertEquals(sentMessages[5].additional[0], additionalRecord);
 
     abortController.abort();
   },
@@ -1189,11 +1178,11 @@ Deno.test({
   fn: async () => {
     const sentMessages: DnsMessage[] = [];
 
-    const testDriver = new TestMulticastDriver((msg) => {
+    const testDriver = new TestMulticastDriver("0.0.0.0", (msg) => {
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedRecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -1208,7 +1197,7 @@ Deno.test({
     const abortController = new AbortController();
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -1246,10 +1235,7 @@ Deno.test({
       answer: [proposedRecord],
       authority: [],
       additional: [],
-    }, {
-      address: "9.9.9.9",
-      port: 5353,
-    });
+    }, "9.9.9.9");
 
     await delay(1);
 
@@ -1267,11 +1253,11 @@ Deno.test({
   fn: async () => {
     const sentMessages: DnsMessage[] = [];
 
-    const testDriver = new TestMulticastDriver((msg) => {
+    const testDriver = new TestMulticastDriver("0.0.0.0", (msg) => {
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const proposedRecord: ResourceRecord = {
       NAME: ["my", "proposed", "record"],
@@ -1286,7 +1272,7 @@ Deno.test({
     const abortController = new AbortController();
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [proposedRecord],
       signal: abortController.signal,
     }).catch(() => {
@@ -1312,16 +1298,16 @@ Deno.test({
     // IPv6 interface cannot refute existence of A address.
     const sentMessages: DnsMessage[] = [];
 
-    const testDriver = new TestMulticastDriver((msg) => {
+    const testDriver = new TestMulticastDriver("0.0.0.0", (msg) => {
       sentMessages.push(msg);
     });
 
-    const minterface = new MulticastInterface(testDriver);
+    const multicastInterface = new MulticastInterface(testDriver);
 
     const abortController = new AbortController();
 
     respond({
-      minterface,
+      multicastInterface,
       proposedRecords: [{
         NAME: ["my", "proposed", "record"],
         CLASS: DnsClass.IN,
@@ -1375,10 +1361,7 @@ Deno.test({
       answer: [],
       authority: [],
       additional: [],
-    }, {
-      address: "9.9.9.9",
-      port: 5353,
-    });
+    }, "9.9.9.9");
 
     await delay(10);
 
@@ -1412,10 +1395,7 @@ Deno.test({
       answer: [],
       authority: [],
       additional: [],
-    }, {
-      address: "9.9.9.9",
-      port: 5353,
-    });
+    }, "9.9.9.9");
 
     await delay(120);
 
@@ -1424,15 +1404,3 @@ Deno.test({
     abortController.abort();
   },
 });
-
-// These are now the responsibility of the DNS-SD layer
-
-/*
-
-Deno.test("If a conflicting response is received after querying, choose new resource record names", () => {});
-Deno.test("If there are fifteen conflicts within ten seconds, wait five seconds before each successive probe attempt", () => {});
-
-Deno.test("Switches to probing after being resumed", () => {});
-Deno.test("Announces unique records with cache-flush bit set after resuming and successful probe", () => {});
-
-*/

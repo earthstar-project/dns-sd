@@ -12,34 +12,38 @@ export class TestMulticastDriver implements MulticastDriver {
   ) => void;
 
   constructor(
+    address: string,
     onDriverSent: (
       msg: DnsMessage,
     ) => void,
   ) {
+    this.address = address;
     this.driverSent = onDriverSent;
   }
 
   private isLooping = true;
   private messages = new FastFIFO<
-    [Uint8Array, { address: string; port: number }]
+    [Uint8Array, { hostname: string; port: number }]
   >(16);
 
-  address = "0.0.0.0";
+  address: string;
   family = "IPv4" as const;
 
   // Driver methods
 
-  setTTL(_ttl: number): void {
-    return;
+  setTTL(_ttl: number): Promise<void> {
+    return Promise.resolve();
   }
-  setLoopback(loopback: boolean): void {
+  setLoopback(loopback: boolean): Promise<void> {
     this.isLooping = loopback;
+
+    return Promise.resolve();
   }
 
   send(message: Uint8Array): Promise<void> {
     if (this.isLooping) {
       this.messages.push([message, {
-        address: "0.0.0.0",
+        hostname: this.address,
         port: 5353,
       }]);
     }
@@ -49,8 +53,8 @@ export class TestMulticastDriver implements MulticastDriver {
     return Promise.resolve();
   }
 
-  receive(): Promise<[Uint8Array, { address: string; port: number }]> {
-    const h = deferred<[Uint8Array, { address: string; port: number }]>();
+  receive(): Promise<[Uint8Array, { hostname: string; port: number }]> {
+    const h = deferred<[Uint8Array, { hostname: string; port: number }]>();
 
     (async () => {
       for await (const msg of this.messages) {
@@ -66,10 +70,20 @@ export class TestMulticastDriver implements MulticastDriver {
     this.messages.close();
   }
 
+  isOwnAddress(address: string): boolean {
+    return address === this.address;
+  }
+
   // Special test methods
 
-  sendInboundMessage(msg: DnsMessage, host: { address: string; port: number }) {
+  sendInboundMessage(
+    msg: DnsMessage,
+    hostname: string,
+  ) {
     const encoded = encodeMessage(msg);
-    this.messages.push([encoded, host]);
+    this.messages.push([encoded, {
+      hostname: hostname,
+      port: 5353,
+    }]);
   }
 }

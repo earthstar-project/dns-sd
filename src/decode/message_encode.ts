@@ -18,7 +18,12 @@ import {
 } from "./types.ts";
 import { concat } from "https://deno.land/std@0.177.0/bytes/mod.ts";
 
-/** Encode a DNS message as bytes */
+/** Encode a DNS message as Uint8Array.
+ *
+ * Compresses domain names, so re-encoded messages may come out smaller.
+ *
+ * Will never use the `TC` flag in the header.
+ */
 export function encodeMessage(msg: DnsMessage): Uint8Array {
   // Encode header
   const header = encodeHeader(msg.header);
@@ -579,20 +584,20 @@ function encodeRdataNSEC(
     manyLabelSeqOffsets,
   );
 
-  const maskLength = record.RDATA.types.length
-    ? Math.ceil(Math.max(...record.RDATA.types) / 8)
-    : 0;
+  const rrTypes = [...new Set(record.RDATA.types)].filter((x) => x <= 255);
+
+  const maskLength = rrTypes ? Math.ceil(Math.max(...rrTypes) / 8) : 0;
 
   const masks = Array(maskLength).fill(0);
 
-  for (const type of record.RDATA.types) {
+  for (const type of rrTypes) {
     const index = ~~(type / 8); // which mask this rrtype is on
     const bit = 7 - type % 8; // convert to network bit order
 
     masks[index] |= 1 << bit;
   }
 
-  const maskBytes = new Uint8Array(2 + maskLength);
+  const maskBytes = new Uint8Array(2 + masks.length);
   const maskView = new DataView(maskBytes.buffer);
 
   maskView.setUint8(0, 0);
@@ -601,7 +606,7 @@ function encodeRdataNSEC(
   for (let i = 0; i < masks.length; i++) {
     const mask = masks[i];
 
-    maskView.setUint8(i + 1, mask);
+    maskView.setUint8(i + 2, mask);
   }
 
   return {
