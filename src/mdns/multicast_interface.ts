@@ -40,34 +40,20 @@ export class MulticastInterface {
     this.driver = driverToUse;
     const subscribers = this.subscribers;
 
-    const readable = new ReadableStream<
-      [DnsMessage, { hostname: string; port: number }]
-    >({
-      async start(controller) {
-        while (true) {
-          const [received, origin] = await driverToUse.receive();
+    (async () => {
+      while (true) {
+        const [received, origin] = await driverToUse.receive();
 
-          try {
-            controller.enqueue([decodeMessage(received), origin]);
-          } catch (err) {
-            console.warn(
-              `Could not decode a DNS message from ${origin.hostname}:${origin.port}`,
-            );
-            console.log(err);
-          }
+        const event = [decodeMessage(received), origin] as [
+          DnsMessage,
+          { hostname: string; port: number },
+        ];
+
+        for (const subscriber of subscribers) {
+          subscriber.push(event);
         }
-      },
-    });
-
-    readable.pipeTo(
-      new WritableStream({
-        write(event) {
-          for (const subscriber of subscribers) {
-            subscriber.push(event);
-          }
-        },
-      }),
-    );
+      }
+    })();
   }
 
   send(message: DnsMessage): Promise<void> {
