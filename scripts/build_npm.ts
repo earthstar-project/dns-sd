@@ -6,8 +6,27 @@ build({
   entryPoints: ["mod.ts"],
   outDir: "npm",
   package: {
-    name: "dns-sd",
+    name: "ya-dns-sd",
     version: Deno.args[0],
+    description:
+      "DNS-SD (aka Zeroconf, Bonjour, Avahi) discovery and advertisement in TypeScript. Again.",
+    license: "LGPL-3.0-only",
+    homepage: "https://earthstar-project.org",
+    funding: {
+      type: "opencollective",
+      url: "https://opencollective.com/earthstar",
+    },
+    keywords: [
+      "dns-sd",
+      "zeroconf",
+      "bonjour",
+      "avahi",
+      "multicast",
+      "mdns",
+      "service",
+      "discovery",
+      "spec-compliant",
+    ],
   },
   shims: {
     deno: {
