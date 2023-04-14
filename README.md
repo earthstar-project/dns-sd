@@ -26,6 +26,27 @@ browser, which is cool even if it doesn't make any sense).
 I also wanted something that used standard `Uint8Array` instead of Node's
 `Buffer` for message encoding and decoding.
 
+## Usage
+
+Deno:
+
+```ts
+import * as dnssd from "https://deno.land/x/dns_sd";
+```
+
+> **NB**: Deno's multicasting APIs have not yet stabilised, so the `--unstable`
+> flag is required to use this module.
+
+On Node, the package is called `ya-dns-sd`:
+
+```ts
+npm install ya-dns-sd
+```
+
+```
+import * as dnssd from "ya-dns-sd";
+```
+
 ## API
 
 ### `browse`
