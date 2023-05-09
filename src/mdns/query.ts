@@ -142,7 +142,7 @@ export class Query {
     // It's a query.
 
     // Is this something we sent ourselves?
-    if (host.hostname === this.minterface.address) {
+    if (host.hostname === this.minterface.hostname) {
       return;
     }
 
