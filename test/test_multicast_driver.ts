@@ -17,7 +17,7 @@ export class TestMulticastDriver implements MulticastDriver {
       msg: DnsMessage,
     ) => void,
   ) {
-    this.address = address;
+    this.hostname = address;
     this.driverSent = onDriverSent;
   }
 
@@ -26,7 +26,7 @@ export class TestMulticastDriver implements MulticastDriver {
     [Uint8Array, { hostname: string; port: number }]
   >(16);
 
-  address: string;
+  hostname: string;
   family = "IPv4" as const;
 
   // Driver methods
@@ -43,7 +43,7 @@ export class TestMulticastDriver implements MulticastDriver {
   send(message: Uint8Array): Promise<void> {
     if (this.isLooping) {
       this.messages.push([message, {
-        hostname: this.address,
+        hostname: this.hostname,
         port: 5353,
       }]);
     }
@@ -71,7 +71,7 @@ export class TestMulticastDriver implements MulticastDriver {
   }
 
   isOwnAddress(address: string): boolean {
-    return address === this.address;
+    return address === this.hostname;
   }
 
   // Special test methods
