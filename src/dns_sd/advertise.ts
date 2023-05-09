@@ -13,10 +13,14 @@ import { respond } from "../mdns/responder.ts";
 
 export type AdvertiseOpts = {
   service: {
+    /** Unique name, e.g. "My Computer" */
     name: string;
+    /** The type of the service, e.g. http. */
     type: string;
+    /** A list of identifiers further identifying the kind of service provided, e.g. ["printer"]. */
     subtypes?: string[];
     protocol: "tcp" | "udp";
+    /** The address to advertise on. Automatically determined if omitted. */
     host?: string;
     port: number;
     txt: Record<string, true | Uint8Array | null>;
