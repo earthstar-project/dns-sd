@@ -7,6 +7,7 @@ import {
   ResourceRecordTXT,
   ResourceType,
 } from "../decode/types.ts";
+import { getOwnAddress } from "../mdns/get_own_address.ts";
 import { MulticastInterface } from "../mdns/multicast_interface.ts";
 import { respond } from "../mdns/responder.ts";
 
@@ -16,7 +17,7 @@ export type AdvertiseOpts = {
     type: string;
     subtypes?: string[];
     protocol: "tcp" | "udp";
-    host: string;
+    host?: string;
     port: number;
     txt: Record<string, true | Uint8Array | null>;
   };
@@ -34,6 +35,9 @@ export type AdvertiseOpts = {
 export async function advertise(opts: AdvertiseOpts) {
   let attemptsInLastTenSeconds = 0;
   const removalTimers: number[] = [];
+
+  const hostToUse = opts.service.host ||
+    await getOwnAddress(opts.multicastInterface);
 
   let renameAttempts = 1;
 
@@ -114,8 +118,8 @@ export async function advertise(opts: AdvertiseOpts) {
       TTL: 120,
       isUnique: true,
       RDATA: opts.multicastInterface.family === "IPv4"
-        ? opts.service.host.split(".").map((strNum) => parseInt(strNum))
-        : opts.service.host,
+        ? hostToUse.split(".").map((strNum) => parseInt(strNum))
+        : hostToUse,
       RDLENGTH: 1,
     } as (ResourceRecordA | ResourceRecordAAAA);
 
