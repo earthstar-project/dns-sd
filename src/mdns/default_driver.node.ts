@@ -6,7 +6,10 @@ import {
   RemoteInfo,
   Socket,
 } from "https://deno.land/std@0.170.0/node/dgram.ts";
-import { networkInterfaces } from "https://deno.land/std@0.170.0/node/os.ts";
+import {
+  hostname,
+  networkInterfaces,
+} from "https://deno.land/std@0.170.0/node/os.ts";
 import { Buffer } from "https://deno.land/std@0.170.0/node/buffer.ts";
 import { FastFIFO } from "../fast_fifo.ts";
 import { deferred } from "https://deno.land/std@0.177.0/async/deferred.ts";
@@ -19,6 +22,7 @@ export class DefaultDriver implements MulticastDriver {
 
   family: "IPv4" | "IPv6";
   address: string;
+  hostname = hostname();
 
   constructor(family: "IPv4" | "IPv6") {
     this.family = family;

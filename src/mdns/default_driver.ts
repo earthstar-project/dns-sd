@@ -9,6 +9,7 @@ export class DefaultDriver implements MulticastDriver {
 
   family: "IPv4" | "IPv6";
   address: string;
+  hostname = Deno.hostname();
 
   constructor(family: "IPv4" | "IPv6") {
     this.address = family === "IPv4" ? "0.0.0.0" : "::";

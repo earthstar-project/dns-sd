@@ -6,9 +6,9 @@ import { DefaultDriver } from "./default_driver.ts";
 
 /** A driver which supplies the underlying methods a `MulticastInterface` uses to send and receive multicast messages. */
 export interface MulticastDriver {
-  address: string;
-
   family: "IPv4" | "IPv6";
+
+  hostname: string;
 
   send(message: Uint8Array): Promise<void>;
 
@@ -44,13 +44,17 @@ export class MulticastInterface {
       while (true) {
         const [received, origin] = await driverToUse.receive();
 
-        const event = [decodeMessage(received), origin] as [
-          DnsMessage,
-          { hostname: string; port: number },
-        ];
+        try {
+          const event = [decodeMessage(received), origin] as [
+            DnsMessage,
+            { hostname: string; port: number },
+          ];
 
-        for (const subscriber of subscribers) {
-          subscriber.push(event);
+          for (const subscriber of subscribers) {
+            subscriber.push(event);
+          }
+        } catch {
+          console.warn("Could not decode a message from", origin.hostname);
         }
       }
     })();
@@ -86,8 +90,8 @@ export class MulticastInterface {
     return this.driver.isOwnAddress(address);
   }
 
-  get address() {
-    return this.driver.address;
+  get hostname() {
+    return this.driver.hostname;
   }
 
   get family() {

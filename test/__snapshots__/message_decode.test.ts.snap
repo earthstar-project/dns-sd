@@ -2,8 +2,7 @@ export const snapshot = {};
 
 snapshot[`Decode message 1`] = `
 {
-  additional: [
-  ],
+  additional: [],
   answer: [
     {
       CLASS: 1,
@@ -24,8 +23,7 @@ snapshot[`Decode message 1`] = `
       isUnique: false,
     },
   ],
-  authority: [
-  ],
+  authority: [],
   header: {
     AA: 0,
     AD: 0,
@@ -59,12 +57,9 @@ snapshot[`Decode message 1`] = `
 
 snapshot[`Decode message 2`] = `
 {
-  additional: [
-  ],
-  answer: [
-  ],
-  authority: [
-  ],
+  additional: [],
+  answer: [],
+  authority: [],
   header: {
     AA: 0,
     AD: 0,
@@ -290,8 +285,7 @@ snapshot[`Decode message 3`] = `
       isUnique: true,
     },
   ],
-  authority: [
-  ],
+  authority: [],
   header: {
     AA: 1,
     AD: 0,
@@ -309,17 +303,14 @@ snapshot[`Decode message 3`] = `
     TC: 0,
     Z: 0,
   },
-  question: [
-  ],
+  question: [],
 }
 `;
 
 snapshot[`Decode message 4`] = `
 {
-  additional: [
-  ],
-  answer: [
-  ],
+  additional: [],
+  answer: [],
   authority: [
     {
       CLASS: 1,
@@ -378,10 +369,8 @@ snapshot[`Decode message 4`] = `
 
 snapshot[`Decode message 5`] = `
 {
-  additional: [
-  ],
-  answer: [
-  ],
+  additional: [],
+  answer: [],
   authority: [
     {
       CLASS: 1,
@@ -605,8 +594,7 @@ snapshot[`Decode message 5`] = `
 
 snapshot[`Decode message 6`] = `
 {
-  additional: [
-  ],
+  additional: [],
   answer: [
     {
       CLASS: 1,
@@ -627,8 +615,7 @@ snapshot[`Decode message 6`] = `
       isUnique: false,
     },
   ],
-  authority: [
-  ],
+  authority: [],
   header: {
     AA: 0,
     AD: 0,
@@ -689,12 +676,9 @@ snapshot[`Decode message 6`] = `
 
 snapshot[`Decode message 7`] = `
 {
-  additional: [
-  ],
-  answer: [
-  ],
-  authority: [
-  ],
+  additional: [],
+  answer: [],
+  authority: [],
   header: {
     AA: 0,
     AD: 0,
@@ -797,8 +781,7 @@ snapshot[`Decode message 8`] = `
   additional: [
     {
       CLASS: 1440,
-      NAME: [
-      ],
+      NAME: [],
       RDATA: Uint8Array(12) [
         0,
         4,
@@ -839,8 +822,7 @@ snapshot[`Decode message 8`] = `
       isUnique: false,
     },
   ],
-  authority: [
-  ],
+  authority: [],
   header: {
     AA: 0,
     AD: 0,
@@ -1031,6 +1013,11 @@ snapshot[`Decode message 9`] = `
         "local",
       ],
       RDATA: {
+        "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[": true,
+        "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\": true,
+        "]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]": true,
+        "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^": true,
+        "\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`": true,
         AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: true,
         BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB: true,
         CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC: true,
@@ -1057,12 +1044,7 @@ snapshot[`Decode message 9`] = `
         XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX: true,
         YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY: true,
         ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ: true,
-        "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[": true,
-        "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\": true,
-        "]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]": true,
-        "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^": true,
         _______________________________: true,
-        "\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`": true,
       },
       RDLENGTH: 1024,
       TTL: 4500,
@@ -1128,8 +1110,7 @@ snapshot[`Decode message 9`] = `
       isUnique: true,
     },
   ],
-  authority: [
-  ],
+  authority: [],
   header: {
     AA: 1,
     AD: 0,
@@ -1147,15 +1128,13 @@ snapshot[`Decode message 9`] = `
     TC: 0,
     Z: 0,
   },
-  question: [
-  ],
+  question: [],
 }
 `;
 
 snapshot[`Decode message 10`] = `
 {
-  additional: [
-  ],
+  additional: [],
   answer: [
     {
       CLASS: 1,
@@ -1320,8 +1299,7 @@ snapshot[`Decode message 10`] = `
       isUnique: false,
     },
   ],
-  authority: [
-  ],
+  authority: [],
   header: {
     AA: 0,
     AD: 0,
@@ -1507,8 +1485,7 @@ snapshot[`Decode message 11`] = `
       isUnique: true,
     },
   ],
-  authority: [
-  ],
+  authority: [],
   header: {
     AA: 1,
     AD: 0,
@@ -1526,8 +1503,7 @@ snapshot[`Decode message 11`] = `
     TC: 0,
     Z: 0,
   },
-  question: [
-  ],
+  question: [],
 }
 `;
 
@@ -1592,8 +1568,7 @@ snapshot[`Decode message 12`] = `
       isUnique: true,
     },
   ],
-  authority: [
-  ],
+  authority: [],
   header: {
     AA: 1,
     AD: 0,
@@ -1611,15 +1586,13 @@ snapshot[`Decode message 12`] = `
     TC: 0,
     Z: 0,
   },
-  question: [
-  ],
+  question: [],
 }
 `;
 
 snapshot[`Decode message 13`] = `
 {
-  additional: [
-  ],
+  additional: [],
   answer: [
     {
       CLASS: 1,
@@ -1640,8 +1613,7 @@ snapshot[`Decode message 13`] = `
       isUnique: false,
     },
   ],
-  authority: [
-  ],
+  authority: [],
   header: {
     AA: 1,
     AD: 0,
@@ -1659,8 +1631,7 @@ snapshot[`Decode message 13`] = `
     TC: 0,
     Z: 0,
   },
-  question: [
-  ],
+  question: [],
 }
 `;
 
@@ -1669,8 +1640,7 @@ snapshot[`Decode message 14`] = `
   additional: [
     {
       CLASS: 1440,
-      NAME: [
-      ],
+      NAME: [],
       RDATA: Uint8Array(12) [
         0,
         4,
@@ -1711,8 +1681,7 @@ snapshot[`Decode message 14`] = `
       isUnique: false,
     },
   ],
-  authority: [
-  ],
+  authority: [],
   header: {
     AA: 0,
     AD: 0,
@@ -1841,8 +1810,7 @@ snapshot[`Decode message 14`] = `
 
 snapshot[`Decode message 15`] = `
 {
-  additional: [
-  ],
+  additional: [],
   answer: [
     {
       CLASS: 1,
@@ -1863,8 +1831,7 @@ snapshot[`Decode message 15`] = `
       isUnique: false,
     },
   ],
-  authority: [
-  ],
+  authority: [],
   header: {
     AA: 1,
     AD: 0,
@@ -1882,17 +1849,14 @@ snapshot[`Decode message 15`] = `
     TC: 0,
     Z: 0,
   },
-  question: [
-  ],
+  question: [],
 }
 `;
 
 snapshot[`Decode message 16`] = `
 {
-  additional: [
-  ],
-  answer: [
-  ],
+  additional: [],
+  answer: [],
   authority: [
     {
       CLASS: 1,
@@ -2112,8 +2076,7 @@ snapshot[`Decode message 17`] = `
     },
     {
       CLASS: 1440,
-      NAME: [
-      ],
+      NAME: [],
       RDATA: Uint8Array(12) [
         0,
         4,
@@ -2311,8 +2274,7 @@ snapshot[`Decode message 17`] = `
       isUnique: true,
     },
   ],
-  authority: [
-  ],
+  authority: [],
   header: {
     AA: 1,
     AD: 0,
@@ -2330,17 +2292,14 @@ snapshot[`Decode message 17`] = `
     TC: 0,
     Z: 0,
   },
-  question: [
-  ],
+  question: [],
 }
 `;
 
 snapshot[`Decode message 18`] = `
 {
-  additional: [
-  ],
-  answer: [
-  ],
+  additional: [],
+  answer: [],
   authority: [
     {
       CLASS: 1,
@@ -2564,8 +2523,7 @@ snapshot[`Decode message 18`] = `
 
 snapshot[`Decode message 19`] = `
 {
-  additional: [
-  ],
+  additional: [],
   answer: [
     {
       CLASS: 1,
@@ -2586,8 +2544,7 @@ snapshot[`Decode message 19`] = `
       isUnique: false,
     },
   ],
-  authority: [
-  ],
+  authority: [],
   header: {
     AA: 0,
     AD: 0,
@@ -2648,8 +2605,7 @@ snapshot[`Decode message 19`] = `
 
 snapshot[`Decode message 20`] = `
 {
-  additional: [
-  ],
+  additional: [],
   answer: [
     {
       CLASS: 1,
@@ -2670,8 +2626,7 @@ snapshot[`Decode message 20`] = `
       isUnique: false,
     },
   ],
-  authority: [
-  ],
+  authority: [],
   header: {
     AA: 0,
     AD: 0,
@@ -2792,6 +2747,11 @@ snapshot[`Decode message 21`] = `
         "local",
       ],
       RDATA: {
+        "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[": true,
+        "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\": true,
+        "]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]": true,
+        "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^": true,
+        "\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`": true,
         AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: true,
         BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB: true,
         CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC: true,
@@ -2818,12 +2778,7 @@ snapshot[`Decode message 21`] = `
         XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX: true,
         YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY: true,
         ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ: true,
-        "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[": true,
-        "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\": true,
-        "]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]": true,
-        "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^": true,
         _______________________________: true,
-        "\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`": true,
       },
       RDLENGTH: 1024,
       TTL: 4500,
@@ -2889,8 +2844,7 @@ snapshot[`Decode message 21`] = `
       isUnique: true,
     },
   ],
-  authority: [
-  ],
+  authority: [],
   header: {
     AA: 1,
     AD: 0,
@@ -2908,8 +2862,7 @@ snapshot[`Decode message 21`] = `
     TC: 0,
     Z: 0,
   },
-  question: [
-  ],
+  question: [],
 }
 `;
 
@@ -2974,8 +2927,7 @@ snapshot[`Decode message 22`] = `
       isUnique: true,
     },
   ],
-  authority: [
-  ],
+  authority: [],
   header: {
     AA: 1,
     AD: 0,
@@ -2993,8 +2945,7 @@ snapshot[`Decode message 22`] = `
     TC: 0,
     Z: 0,
   },
-  question: [
-  ],
+  question: [],
 }
 `;
 
@@ -3161,8 +3112,7 @@ snapshot[`Decode message 23`] = `
     },
     {
       CLASS: 1440,
-      NAME: [
-      ],
+      NAME: [],
       RDATA: Uint8Array(12) [
         0,
         4,
@@ -3360,8 +3310,7 @@ snapshot[`Decode message 23`] = `
       isUnique: true,
     },
   ],
-  authority: [
-  ],
+  authority: [],
   header: {
     AA: 1,
     AD: 0,
@@ -3379,15 +3328,13 @@ snapshot[`Decode message 23`] = `
     TC: 0,
     Z: 0,
   },
-  question: [
-  ],
+  question: [],
 }
 `;
 
 snapshot[`Decode message 24`] = `
 {
-  additional: [
-  ],
+  additional: [],
   answer: [
     {
       CLASS: 1,
@@ -3552,8 +3499,7 @@ snapshot[`Decode message 24`] = `
       isUnique: false,
     },
   ],
-  authority: [
-  ],
+  authority: [],
   header: {
     AA: 0,
     AD: 0,

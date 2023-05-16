@@ -68,6 +68,10 @@ export class Query {
           break;
         }
 
+        if (multicastInterface.isOwnAddress(host.hostname)) {
+          continue;
+        }
+
         if (message.header.QR === 0) {
           this.handleQuery(message, host);
         } else {
@@ -142,7 +146,7 @@ export class Query {
     // It's a query.
 
     // Is this something we sent ourselves?
-    if (host.hostname === this.minterface.address) {
+    if (this.minterface.isOwnAddress(host.hostname)) {
       return;
     }
 
