@@ -21,7 +21,7 @@ and can run in browsers and Deno.
 I made this because there weren't any DNS-SD libraries written in TypeScript
 _and_ which had service browsing _and_ service advertising _and_ which could run
 on alternative JS runtimes like Deno (theoretically this module can run in the
-browser, which is cool even if it doesn't make any sense).
+browser, which is cool — even if it doesn't make any sense).
 
 I also wanted something that used standard `Uint8Array` instead of Node's
 `Buffer` for message encoding and decoding.
@@ -39,11 +39,11 @@ import * as dnssd from "https://deno.land/x/dns_sd";
 
 On Node, the package is called `ya-dns-sd`:
 
-```ts
+```
 npm install ya-dns-sd
 ```
 
-```
+```ts
 import * as dnssd from "ya-dns-sd";
 ```
 
@@ -97,6 +97,11 @@ await advertise({
   multicastInterface: new MulticastInterface(),
 });
 ```
+
+## Advanced API
+
+These are lower-level APIs for directly working with DNS records. `browse` and
+`advertise` are implemented using these.
 
 ### `respond`
 
