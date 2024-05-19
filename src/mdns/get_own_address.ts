@@ -1,10 +1,10 @@
-import { deferred } from "https://deno.land/std@0.170.0/async/deferred.ts";
 import { MulticastInterface } from "./multicast_interface.ts";
 
+/** Get the machines own multicast address. */
 export async function getOwnAddress(
   multicastInterface: MulticastInterface,
 ): Promise<string> {
-  const ownAddressPromise = deferred<string>();
+  const ownAddress = Promise.withResolvers<string>();
 
   multicastInterface.setLoopback(true);
 
@@ -12,7 +12,7 @@ export async function getOwnAddress(
   (async () => {
     for await (const [_msg, addr] of multicastInterface.messages()) {
       if (multicastInterface.isOwnAddress(addr.hostname)) {
-        ownAddressPromise.resolve(addr.hostname);
+        ownAddress.resolve(addr.hostname);
       }
     }
   })();
@@ -42,5 +42,5 @@ export async function getOwnAddress(
     additional: [],
   });
 
-  return ownAddressPromise;
+  return ownAddress.promise;
 }

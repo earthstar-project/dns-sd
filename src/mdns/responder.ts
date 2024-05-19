@@ -1,5 +1,4 @@
-import { deferred } from "https://deno.land/std@0.177.0/async/deferred.ts";
-import { concat } from "https://deno.land/std@0.177.0/bytes/concat.ts";
+import { concat } from "@std/bytes";
 import {
   encodeRdataA,
   encodeRdataAAAA,
@@ -40,7 +39,7 @@ export type RespondOpts = {
  * - Probing for proposed records fails
  * - Another responder starts responding with records our responder previously lay claim to.
  */
-export async function respond(opts: RespondOpts) {
+export async function respond(opts: RespondOpts): Promise<void> {
   let aborted = false;
 
   if (opts.proposedRecords.length === 0) {
@@ -55,7 +54,7 @@ export async function respond(opts: RespondOpts) {
 
   const sender = new AggregatingScheduledSend(opts.multicastInterface);
 
-  const respondPromise = deferred();
+  const promise = Promise.withResolvers<void>();
 
   if (opts.signal) {
     opts.signal.addEventListener("abort", () => {
@@ -91,7 +90,7 @@ export async function respond(opts: RespondOpts) {
       });
 
       sender.stop();
-      respondPromise.reject("aborted");
+      promise.reject("aborted");
       aborted = true;
     });
   }
@@ -166,7 +165,7 @@ export async function respond(opts: RespondOpts) {
               // Someone else is sending out records that conflict with ours!
               // We need to start over.
 
-              respondPromise.reject(
+              promise.reject(
                 "Conflicting record was received from another host.",
               );
 
@@ -178,7 +177,7 @@ export async function respond(opts: RespondOpts) {
     }
   })();
 
-  return respondPromise;
+  return promise.promise;
 }
 
 /** Returns answers (as resource records) for a given set of questions.
@@ -502,7 +501,7 @@ type ProbeResult = "name_taken" | "simultaneous_probe" | "success";
  * Returns a promise indicating whether probing was successful or if a conflict was found.
  */
 function probe(opts: ProbeOpts): Promise<ProbeResult> {
-  const promise = deferred<ProbeResult>();
+  const promiseWithResolvers = Promise.withResolvers<ProbeResult>();
 
   const desiredNames = desiredNamesFromRecords(opts.proposedRecords);
 
@@ -549,7 +548,7 @@ function probe(opts: ProbeOpts): Promise<ProbeResult> {
           clearProbeTimers();
           // choose a new name
 
-          promise.resolve("name_taken");
+          promiseWithResolvers.resolve("name_taken");
           break;
         }
       } else {
@@ -576,7 +575,7 @@ function probe(opts: ProbeOpts): Promise<ProbeResult> {
           if (order === -1) {
             // if we lose, probe with the same name again in one second.
 
-            promise.resolve("simultaneous_probe");
+            promiseWithResolvers.resolve("simultaneous_probe");
             clearProbeTimers();
             break;
           }
@@ -621,7 +620,7 @@ function probe(opts: ProbeOpts): Promise<ProbeResult> {
       probeCount++;
 
       if (probeCount === 3) {
-        promise.resolve("success");
+        promiseWithResolvers.resolve("success");
         return;
       }
 
@@ -639,7 +638,7 @@ function probe(opts: ProbeOpts): Promise<ProbeResult> {
 
   probeTimers.push(firstProbeTimer);
 
-  return promise;
+  return promiseWithResolvers.promise;
 }
 
 // Announce
@@ -648,7 +647,7 @@ function probe(opts: ProbeOpts): Promise<ProbeResult> {
  *
  * Returns a promise which resolves after two announcements have been broadcast.
  */
-async function announce(opts: RespondOpts) {
+async function announce(opts: RespondOpts): Promise<void> {
   const additionalRecords = new Set<ResourceRecord>();
 
   for (const record of opts.proposedRecords) {
@@ -691,7 +690,7 @@ async function announce(opts: RespondOpts) {
   };
 
   // Two announcements, one second apart.
-  const announcePromise = deferred();
+  const announcePromise = Promise.withResolvers<void>();
 
   await opts.multicastInterface.send(announceMessage);
 
@@ -704,7 +703,7 @@ async function announce(opts: RespondOpts) {
     clearTimeout(secondAnnounceTimer);
   });
 
-  return announcePromise;
+  return announcePromise.promise;
 }
 
 // Conflict resolving stuff
@@ -1007,7 +1006,7 @@ function encodeRdataSRV(
 
   const labelBytes = encodeLabelSequence(record.NAME);
 
-  return concat(srvBytes, labelBytes);
+  return concat([srvBytes, labelBytes]);
 }
 
 function encodeRdataNSEC(
@@ -1042,7 +1041,7 @@ function encodeRdataNSEC(
     maskView.setUint8(i + 2, mask);
   }
 
-  return concat(labelBytes, maskBytes);
+  return concat([labelBytes, maskBytes]);
 }
 
 function encodeLabelSequence(

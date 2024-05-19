@@ -1,4 +1,4 @@
-import { walk } from "https://deno.land/std@0.177.0/fs/mod.ts";
+import { walk } from "@std/fs";
 import { decodeMessage } from "../src/decode/message_decode.ts";
 import { assertSnapshot } from "https://deno.land/std@0.177.0/testing/snapshot.ts";
 import { assertEquals } from "https://deno.land/std@0.177.0/testing/asserts.ts";

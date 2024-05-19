@@ -1,4 +1,4 @@
-# dns_sd
+# dns-sd
 
 A module of utilities for DNS-SD (aka Zeroconf, Bonjour, Avahi), featuring:
 
@@ -16,7 +16,7 @@ A module of utilities for DNS-SD (aka Zeroconf, Bonjour, Avahi), featuring:
 
 This module was made so that [Earthstar](https://earthstar-project.org) can have
 automatic peer discovery on a local network. Earthstar is written in TypeScript,
-and can run in browsers and Deno.
+and can run in browsers, Deno, and Node.
 
 I made this because there weren't any DNS-SD libraries written in TypeScript
 _and_ which had service browsing _and_ service advertising _and_ which could run
@@ -28,24 +28,12 @@ I also wanted something that used standard `Uint8Array` instead of Node's
 
 ## Usage
 
-Deno:
+This module works for both Deno and Node. The multicast drivers for each can be
+found at the `@earthstar/dns-sd/deno` and `@earthstar/dns-sd/node` entrypoints,
+respectively.
 
-```ts
-import * as dnssd from "https://deno.land/x/dns_sd";
-```
-
-> **NB**: Deno's multicasting APIs have not yet stabilised, so the `--unstable`
-> flag is required to use this module.
-
-On Node, the package is called `ya-dns-sd`:
-
-```
-npm install ya-dns-sd
-```
-
-```ts
-import * as dnssd from "ya-dns-sd";
-```
+> **NB**: Deno's multicasting APIs have not yet stabilised, so the
+> `--unstable-net` flag is required to use this module.
 
 ## API
 

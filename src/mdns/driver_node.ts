@@ -1,20 +1,12 @@
 import { MDNS_IPV4, MDNS_IPV6, MDNS_PORT } from "./constants.ts";
 import { MulticastDriver } from "./multicast_interface.ts";
-
-import {
-  createSocket,
-  RemoteInfo,
-  Socket,
-} from "https://deno.land/std@0.170.0/node/dgram.ts";
-import {
-  hostname,
-  networkInterfaces,
-} from "https://deno.land/std@0.170.0/node/os.ts";
-import { Buffer } from "https://deno.land/std@0.170.0/node/buffer.ts";
+import { createSocket, RemoteInfo, Socket } from "node:dgram";
+import { hostname, networkInterfaces } from "node:os";
+import { Buffer } from "node:buffer";
 import { FastFIFO } from "../fast_fifo.ts";
-import { deferred } from "https://deno.land/std@0.177.0/async/deferred.ts";
 
-export class DefaultDriver implements MulticastDriver {
+/** A multicast driver using Node's `dgram` module. */
+export class DriverNode implements MulticastDriver {
   private socket: Socket;
   private messages = new FastFIFO<
     [Uint8Array, { hostname: string; port: number }]
@@ -22,7 +14,7 @@ export class DefaultDriver implements MulticastDriver {
 
   family: "IPv4" | "IPv6";
   address: string;
-  hostname = hostname();
+  hostname: string = hostname();
 
   constructor(family: "IPv4" | "IPv6") {
     this.family = family;
@@ -69,7 +61,9 @@ export class DefaultDriver implements MulticastDriver {
   }
 
   receive(): Promise<[Uint8Array, { hostname: string; port: number }]> {
-    const h = deferred<[Uint8Array, { hostname: string; port: number }]>();
+    const h = Promise.withResolvers<
+      [Uint8Array, { hostname: string; port: number }]
+    >();
 
     (async () => {
       for await (const msg of this.messages) {
@@ -78,7 +72,7 @@ export class DefaultDriver implements MulticastDriver {
       }
     })();
 
-    return h;
+    return h.promise;
   }
 
   isOwnAddress(address: string): boolean {

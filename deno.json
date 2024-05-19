@@ -1,7 +1,23 @@
 {
-  "tasks": {
-    "test": "deno test -A --unstable test",
-    "npm": "deno run -A scripts/build_npm.ts"
+  "name": "@earthstar/dns-sd",
+  "version": "3.0.0",
+  "exports": {
+    ".": "./mod.ts",
+    "./deno": "./mod.deno.ts",
+    "./node": "./mod.node.ts"
   },
-  "lock": false
+  "publish": {
+    "exclude": ["./test", "./.github"]
+  },
+  "tasks": {
+    "test": "deno test -A test"
+  },
+  "lock": false,
+  "imports": {
+    "@std/assert": "jsr:@std/assert@^0.225.2",
+    "@std/async": "jsr:@std/async@^0.224.0",
+    "@std/bytes": "jsr:@std/bytes@^0.224.0",
+    "@std/fs": "jsr:@std/fs@^0.229.1"
+  },
+  "unstable": ["net"]
 }

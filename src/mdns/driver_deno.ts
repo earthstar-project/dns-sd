@@ -1,7 +1,8 @@
 import { MDNS_IPV4, MDNS_IPV6, MDNS_PORT } from "./constants.ts";
 import { MulticastDriver } from "./multicast_interface.ts";
 
-export class DefaultDriver implements MulticastDriver {
+/** A multicast driver using Deno's (unstable) {@linkcode Deno.listenDatagram} API. */
+export class DriverDeno implements MulticastDriver {
   private conn: Deno.DatagramConn;
   private membership:
     | ReturnType<Deno.DatagramConn["joinMulticastV4"]>
@@ -9,7 +10,7 @@ export class DefaultDriver implements MulticastDriver {
 
   family: "IPv4" | "IPv6";
   address: string;
-  hostname = Deno.hostname();
+  hostname: string = Deno.hostname();
 
   constructor(family: "IPv4" | "IPv6") {
     this.address = family === "IPv4" ? "0.0.0.0" : "::";

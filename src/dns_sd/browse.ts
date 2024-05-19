@@ -58,7 +58,7 @@ export type Service = {
  * }
  * ```
  */
-export function browse(opts: BrowseOpts) {
+export function browse(opts: BrowseOpts): AsyncIterable<Service> {
   const subName = `${
     opts.service.subtypes && opts.service.subtypes.length > 0
       ? `${opts.service.subtypes.map((sub) => `_${sub}`).join(".")}._sub.`

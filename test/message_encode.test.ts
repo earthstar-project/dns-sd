@@ -1,6 +1,5 @@
-import { walk } from "https://deno.land/std@0.177.0/fs/walk.ts";
-import { assertEquals } from "https://deno.land/std@0.177.0/testing/asserts.ts";
-
+import { walk } from "@std/fs";
+import { assertEquals } from "@std/assert";
 import { decodeMessage } from "../src/decode/message_decode.ts";
 import { encodeMessage } from "../src/decode/message_encode.ts";
 import { ResourceRecord } from "../src/decode/types.ts";

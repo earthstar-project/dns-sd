@@ -36,7 +36,7 @@ export type AdvertiseOpts = {
  *
  * If the service has to be renamed due to a conflict, a warning with the new name will be sent to the console.
  */
-export async function advertise(opts: AdvertiseOpts) {
+export async function advertise(opts: AdvertiseOpts): Promise<void> {
   let attemptsInLastTenSeconds = 0;
   const removalTimers: number[] = [];
 

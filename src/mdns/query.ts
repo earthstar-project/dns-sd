@@ -1,4 +1,3 @@
-import { shallowEqualArrays } from "../../deps.ts";
 import {
   DnsClass,
   DnsMessage,
@@ -279,7 +278,7 @@ export class Query {
     }
   }
 
-  async *[Symbol.asyncIterator]() {
+  async *[Symbol.asyncIterator](): AsyncIterator<QueryCacheEvent> {
     for await (const event of this.recordCache.events) {
       yield event;
     }
@@ -341,7 +340,7 @@ class RecordCache {
     if (record.isUnique) {
       for (const [prevRecord] of this.records) {
         if (
-          shallowEqualArrays(record.NAME, prevRecord.NAME) &&
+          isEqualRecordName(record.NAME, prevRecord.NAME) &&
           record.TYPE === prevRecord.TYPE &&
           record.CLASS === prevRecord.CLASS
         ) {
@@ -456,4 +455,21 @@ function wigglyPercentOf(percent: number, total: number) {
   const wiggle = Math.random() * (percent + 2 - percent) + percent;
 
   return (wiggle / 100) * total;
+}
+
+function isEqualRecordName(
+  a: ResourceRecord["NAME"],
+  b: ResourceRecord["NAME"],
+): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
+
+  return true;
 }

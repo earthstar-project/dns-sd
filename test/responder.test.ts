@@ -1,6 +1,6 @@
 // Probing stuff
 
-import { delay } from "https://deno.land/std@0.177.0/async/delay.ts";
+import { delay } from "@std/async";
 import {
   DnsClass,
   DnsMessage,
@@ -10,11 +10,7 @@ import {
 import { MulticastInterface } from "../src/mdns/multicast_interface.ts";
 import { respond, RespondingRecord } from "../src/mdns/responder.ts";
 import { TestMulticastDriver } from "./test_multicast_driver.ts";
-import {
-  assert,
-  assertEquals,
-  assertRejects,
-} from "https://deno.land/std@0.177.0/testing/asserts.ts";
+import { assert, assertEquals, assertRejects } from "@std/assert";
 
 Deno.test("Probes for the record it wishes to be unique for", async () => {
   const sentMessages: DnsMessage[] = [];

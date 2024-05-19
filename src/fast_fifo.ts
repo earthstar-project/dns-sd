@@ -79,7 +79,7 @@ export class FastFIFO<T> {
     }
   }
 
-  shift() {
+  shift(): Enqueueable<T> | undefined {
     const val = this.tail.shift();
     if (val === undefined && this.tail.next) {
       const next = this.tail.next;
@@ -91,11 +91,11 @@ export class FastFIFO<T> {
     return val;
   }
 
-  peek() {
+  peek(): Enqueueable<T> | undefined {
     return this.tail.peek();
   }
 
-  isEmpty() {
+  isEmpty(): boolean {
     return this.head.isEmpty();
   }
 
@@ -103,7 +103,7 @@ export class FastFIFO<T> {
     this.push(END);
   }
 
-  async *[Symbol.asyncIterator]() {
+  async *[Symbol.asyncIterator](): AsyncIterator<T> {
     while (true) {
       const shifted = this.shift();
 

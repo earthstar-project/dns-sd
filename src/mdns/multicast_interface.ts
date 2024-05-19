@@ -2,7 +2,6 @@ import { decodeMessage } from "../decode/message_decode.ts";
 import { encodeMessage } from "../decode/message_encode.ts";
 import { DnsMessage } from "../decode/types.ts";
 import { FastFIFO } from "../fast_fifo.ts";
-import { DefaultDriver } from "./default_driver.ts";
 
 /** A driver which supplies the underlying methods a `MulticastInterface` uses to send and receive multicast messages. */
 export interface MulticastDriver {
@@ -34,15 +33,13 @@ export class MulticastInterface {
     [DnsMessage, { hostname: string; port: number }]
   >[] = [];
 
-  constructor(driver?: MulticastDriver) {
-    const driverToUse = driver || new DefaultDriver("IPv4");
-
-    this.driver = driverToUse;
+  constructor(driver: MulticastDriver) {
+    this.driver = driver;
     const subscribers = this.subscribers;
 
     (async () => {
       while (true) {
-        const [received, origin] = await driverToUse.receive();
+        const [received, origin] = await driver.receive();
 
         try {
           const event = [decodeMessage(received), origin] as [
@@ -60,23 +57,27 @@ export class MulticastInterface {
     })();
   }
 
+  /** Send a DNS message. */
   send(message: DnsMessage): Promise<void> {
     const encoded = encodeMessage(message);
 
     return this.driver.send(encoded);
   }
 
+  /** Set the time-to-live (TTL). */
   setTTL(ttl: number): void {
     if (this.driver.family === "IPv4") {
       this.driver.setTTL(ttl);
     }
   }
 
+  /** Set the loopback (whether messages sent from this machine are received by itself). */
   setLoopback(loopback: boolean): void {
     this.driver.setLoopback(loopback);
   }
 
-  messages() {
+  /** Iterator of received messages. */
+  messages(): AsyncIterable<[DnsMessage, { hostname: string; port: number }]> {
     const subscriber = new FastFIFO<
       [DnsMessage, { hostname: string; port: number }]
     >(16);
@@ -86,15 +87,17 @@ export class MulticastInterface {
     return subscriber;
   }
 
+  /** Return if a host address is our own address. */
   isOwnAddress(address: string): boolean {
     return this.driver.isOwnAddress(address);
   }
 
-  get hostname() {
+  get hostname(): string {
     return this.driver.hostname;
   }
 
-  get family() {
+  /** Whether this interface uses IPv4 or IPv6 */
+  get family(): "IPv4" | "IPv6" {
     return this.driver.family;
   }
 }

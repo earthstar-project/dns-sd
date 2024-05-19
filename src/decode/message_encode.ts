@@ -16,7 +16,7 @@ import {
   ResourceRecordNSEC,
   ResourceRecordSRV,
 } from "./types.ts";
-import { concat } from "https://deno.land/std@0.177.0/bytes/mod.ts";
+import { concat } from "@std/bytes";
 
 /** Encode a DNS message as Uint8Array.
  *
@@ -204,7 +204,7 @@ export function encodeMessage(msg: DnsMessage): Uint8Array {
     messageBytes.push(rdataBytes);
   }
 
-  return concat(header, ...messageBytes);
+  return concat([header, ...messageBytes]);
 }
 
 function encodeHeader(header: DnsMessageHeader): Uint8Array {
@@ -374,7 +374,7 @@ function encodeQuestion(
   typeClassDataView.setUint16(2, question.QCLASS);
 
   return {
-    bytes: concat(labelBytes, typeClassBytes),
+    bytes: concat([labelBytes, typeClassBytes]),
     encodedLabelOffsets: offsetPositions(newLabelOffsets, questionOffset),
   };
 }
@@ -414,7 +414,7 @@ function encodeResourceRecord(
   otherDataView.setUint16(8, resourceRecord.RDLENGTH);
 
   return {
-    bytes: concat(labelBytes, otherBytes),
+    bytes: concat([labelBytes, otherBytes]),
     encodedLabelOffsets: offsetPositions(newLabelOffsets, offset),
   };
 }
@@ -506,14 +506,14 @@ export function encodeRdataTXT(
     } else if (value instanceof Uint8Array) {
       attrView.setUint8(position, "=".charCodeAt(0));
 
-      attributesBytes.push(concat(attrBytes, value));
+      attributesBytes.push(concat([attrBytes, value]));
       continue;
     } else {
       attributesBytes.push(attrBytes);
     }
   }
 
-  return concat(...attributesBytes);
+  return concat(attributesBytes);
 }
 
 export function encodeRdataAAAA(
@@ -565,7 +565,7 @@ function encodeRdataSRV(
   );
 
   return {
-    bytes: concat(srvBytes, labelBytes),
+    bytes: concat([srvBytes, labelBytes]),
     encodedLabelOffsets: offsetPositions(newLabelOffsets, 6 + offset),
   };
 }
@@ -610,7 +610,7 @@ function encodeRdataNSEC(
   }
 
   return {
-    bytes: concat(labelBytes, maskBytes),
+    bytes: concat([labelBytes, maskBytes]),
     encodedLabelOffsets: offsetPositions(newLabelOffsets, offset),
   };
 }

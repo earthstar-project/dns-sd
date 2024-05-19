@@ -1,6 +1,5 @@
 import { FastFIFO } from "../src/fast_fifo.ts";
 import { MulticastDriver } from "../src/mdns/multicast_interface.ts";
-import { deferred } from "https://deno.land/std@0.177.0/async/deferred.ts";
 import { DnsMessage } from "../src/decode/types.ts";
 import { encodeMessage } from "../src/decode/message_encode.ts";
 import { decodeMessage } from "../src/decode/message_decode.ts";
@@ -54,7 +53,9 @@ export class TestMulticastDriver implements MulticastDriver {
   }
 
   receive(): Promise<[Uint8Array, { hostname: string; port: number }]> {
-    const h = deferred<[Uint8Array, { hostname: string; port: number }]>();
+    const h = Promise.withResolvers<
+      [Uint8Array, { hostname: string; port: number }]
+    >();
 
     (async () => {
       for await (const msg of this.messages) {
@@ -63,7 +64,7 @@ export class TestMulticastDriver implements MulticastDriver {
       }
     })();
 
-    return h;
+    return h.promise;
   }
 
   close() {

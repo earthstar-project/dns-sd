@@ -1,12 +1,9 @@
-import { delay } from "https://deno.land/std@0.177.0/async/delay.ts";
+import { delay } from "@std/async";
 import { MulticastInterface } from "../src/mdns/multicast_interface.ts";
 import { TestMulticastDriver } from "./test_multicast_driver.ts";
 import { browse, Service } from "../src/dns_sd/browse.ts";
 import { advertise } from "../src/dns_sd/advertise.ts";
-import {
-  assert,
-  assertEquals,
-} from "https://deno.land/std@0.177.0/testing/asserts.ts";
+import { assert, assertEquals } from "@std/assert";
 
 // Integration test: if something is advertised, it should be found by the browser.
 Deno.test({

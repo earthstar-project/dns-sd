@@ -7,6 +7,22 @@
  *
  * Supports different JS runtimes (e.g. Deno, Node) via multicast interface drivers.
  *
+ * ```ts
+ * for await (
+ *  const service of browse({
+ *    multicastInterface: new MulticastInterface(new DriverDeno("IPv4")),
+ *    service: {
+ *      protocol: "tcp",
+ *      type: "http",
+ *      subtypes: [],
+ *    },
+ *  })
+ * ) {
+ *  if (service.isActive) {
+ *    console.log(`📡 ${service.name} - ${service.host}:${service.port}`);
+ *  }
+ * }
+ *
  * @author Sam Gwilym sam@gwil.garden
  * @module
  */
