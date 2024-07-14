@@ -31,6 +31,7 @@
 
 export { decodeMessage } from "./src/decode/message_decode.ts";
 export { encodeMessage } from "./src/decode/message_encode.ts";
+export { DnsClass, ResourceType } from "./src/decode/types.ts";
 
 // Multicast DNS
 
@@ -46,7 +47,7 @@ export {
 } from "./src/mdns/query.ts";
 
 export {
-  type respond,
+  respond,
   type RespondingRecord,
   type RespondOpts,
 } from "./src/mdns/responder.ts";
